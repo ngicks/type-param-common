@@ -15,8 +15,8 @@ func TestReverse(t *testing.T) {
 	}
 
 	expectedRev := []int{5, 4, 3, 2, 1}
-	iterSliceRev := &iterator.Reverser[int]{iterator.FromSlice[int](expected)}
-	iterListRev := &iterator.Reverser[int]{iterator.FromList[int](intLis)}
+	iterSliceRev := iterator.NewReverser[int](iterator.FromSlice(expected))
+	iterListRev := iterator.NewReverser[int](iterator.FromList(intLis))
 	testIteratorBasic[int](t, iterSliceRev, expectedRev)
 	testIteratorBasic[int](t, iterListRev, expectedRev)
 }

@@ -72,3 +72,29 @@ func TestIterBack(t *testing.T) {
 	iterList := iterator.FromList(intLis)
 	testIterBack(t, iterList)
 }
+
+func TestCombination(t *testing.T) {
+	expected := []int{1, 2, 3, 4, 5, 6, 7, 8}
+	iter := iterator.FromSlice(expected)
+
+	reduced := iterator.Reduce[int](
+		// 1, 4, 9, 16, 25, 36, 49, 64
+		iterator.Map[int](iter, func(next int) int { return next * next }).
+			// 9, 16, 36, 49
+			Select(
+				func(i int) bool { return (i%10)%3 == 0 },
+			).
+			// 49, 36, 16, 9
+			Reverse().
+			// 16, 9
+			SkipN(2),
+		func(accumulator, next int) int {
+			return accumulator + next
+		},
+		0,
+	)
+
+	if reduced != 25 {
+		t.Fatalf("must be %d, but %d", 25, reduced)
+	}
+}

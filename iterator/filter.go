@@ -1,23 +1,21 @@
 package iterator
 
-var _ Iterator[any] = Excluder[any]{}
-
 type Excluder[T any] struct {
-	DeIterator[T]
+	inner    DeIterator[T]
 	excluder func(T) bool
 }
 
-func Exclude[T any](iter DeIterator[T], excluder func(T) bool) Excluder[T] {
+func NewExcluder[T any](iter DeIterator[T], excluder func(T) bool) Excluder[T] {
 	return Excluder[T]{
-		DeIterator: iter,
-		excluder:   excluder,
+		inner:    iter,
+		excluder: excluder,
 	}
 }
 
-func (e Excluder[T]) Next() (next T, ok bool) {
+func (e Excluder[T]) next(nextFn nextFunc[T]) (next T, ok bool) {
 	var v T
 	for {
-		v, ok = e.DeIterator.Next()
+		v, ok = nextFn()
 		if !ok {
 			return
 		}
@@ -26,75 +24,41 @@ func (e Excluder[T]) Next() (next T, ok bool) {
 		}
 		return v, ok
 	}
+}
+func (e Excluder[T]) Next() (next T, ok bool) {
+	return e.next(e.inner.Next)
 }
 func (e Excluder[T]) NextBack() (next T, ok bool) {
-	var v T
-	for {
-		v, ok = e.DeIterator.NextBack()
-		if !ok {
-			return
-		}
-		if e.excluder(v) {
-			continue
-		}
-		return v, ok
-	}
+	return e.next(e.inner.NextBack)
 }
-func (e Excluder[T]) Reverse() Reverser[T] {
-	return Reverser[T]{e}
-}
-func (e Excluder[T]) Select(selector func(T) bool) Selector[T] {
-	return Selector[T]{e, selector}
-}
-func (e Excluder[T]) Exclude(excluder func(T) bool) Excluder[T] {
-	return Excluder[T]{e, excluder}
-}
-
-var _ Iterator[any] = Selector[any]{}
 
 type Selector[T any] struct {
-	DeIterator[T]
+	inner    DeIterator[T]
 	selector func(T) bool
 }
 
-func Select[T any](iter DeIterator[T], selector func(T) bool) Selector[T] {
+func NewSelector[T any](iter DeIterator[T], selector func(T) bool) Selector[T] {
 	return Selector[T]{
-		DeIterator: iter,
-		selector:   selector,
+		inner:    iter,
+		selector: selector,
 	}
 }
 
-func (e Selector[T]) Next() (next T, ok bool) {
+func (s Selector[T]) next(nexter nextFunc[T]) (next T, ok bool) {
 	var v T
 	for {
-		v, ok = e.DeIterator.Next()
+		v, ok = nexter()
 		if !ok {
 			return
 		}
-		if e.selector(v) {
+		if s.selector(v) {
 			return v, ok
 		}
 	}
 }
-func (e Selector[T]) NextBack() (next T, ok bool) {
-	var v T
-	for {
-		v, ok = e.DeIterator.NextBack()
-		if !ok {
-			return
-		}
-		if e.selector(v) {
-			return v, ok
-		}
-	}
+func (s Selector[T]) Next() (next T, ok bool) {
+	return s.next(s.inner.Next)
 }
-
-func (s Selector[T]) Reverse() Reverser[T] {
-	return Reverser[T]{s}
-}
-func (s Selector[T]) Select(selector func(T) bool) Selector[T] {
-	return Selector[T]{s, selector}
-}
-func (s Selector[T]) Exclude(excluder func(T) bool) Excluder[T] {
-	return Excluder[T]{s, excluder}
+func (s Selector[T]) NextBack() (next T, ok bool) {
+	return s.next(s.inner.NextBack)
 }
