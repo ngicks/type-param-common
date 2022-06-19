@@ -6,7 +6,7 @@ Basically wrapper around go std library. If wrapping is inadequate, copy-and-pas
 
 ## Non overlapping package name
 
-Wrappers of Go std lib are prefixed with `-param`
+Wrappers of Go std lib are suffixed with `-param`
 
 ## Package descriptions
 
