@@ -14,6 +14,8 @@ func (m *Map[K, V]) Delete(key K) {
 func (m *Map[K, V]) Load(key K) (value V, ok bool) {
 	v, ok := m.inner.Load(key)
 	if v == nil {
+		// It could be untyped nil or whatever inconvertible to type V.
+		// Return zero-value in that case.
 		return
 	}
 	return v.(V), ok

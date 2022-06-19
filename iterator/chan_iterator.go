@@ -4,6 +4,8 @@ type ChanIter[T any] struct {
 	channel <-chan T
 }
 
+// FromChannel makes ChanIter associated with given channel.
+// To convey end of iterator, close passed channel.
 func FromChannel[T any](channel <-chan T) *ChanIter[T] {
 	return &ChanIter[T]{
 		channel: channel,

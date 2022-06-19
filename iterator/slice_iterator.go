@@ -6,6 +6,9 @@ type SliceIter[T any] struct {
 	idxBack    int
 }
 
+// FromSlice makes SliceIter from []T.
+// Range is fixed at the time FromSlice returns.
+// Mutating passed sl outside this iterator may cause undefined behavior.
 func FromSlice[T any](sl []T) *SliceIter[T] {
 	return &SliceIter[T]{
 		innerSlice: sl,

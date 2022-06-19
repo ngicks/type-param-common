@@ -12,9 +12,14 @@ func NewElement[T any]() Element[T] {
 	}
 }
 
+// Unwrap returns internal *`container/list`.Element.
+// Setting non-T value may cause runtime panic in succeeding Get call.
 func (e Element[T]) Unwrap() *list.Element {
 	return e.inner
 }
+
+// Get returns internal Value. If internal Value is non-nil and then returns value and true.
+// Otherwise returns zero of T and false.
 func (e Element[T]) Get() (v T, ok bool) {
 	if e.inner.Value == nil {
 		return
@@ -22,8 +27,15 @@ func (e Element[T]) Get() (v T, ok bool) {
 		return e.inner.Value.(T), true
 	}
 }
+
+// Clear is equivalent to `element.Value = v`
 func (e Element[T]) Set(v T) {
 	e.inner.Value = v
+}
+
+// Clear is equivalent to `element.Value = nil`
+func (e Element[T]) Clear() {
+	e.inner.Value = nil
 }
 func (e Element[T]) Next() Element[T] {
 	return Element[T]{
@@ -101,6 +113,10 @@ func (l List[T]) PushFront(v T) Element[T] {
 func (l List[T]) PushFrontList(other List[T]) {
 	l.inner.PushFrontList(other.inner)
 }
+
+// Remove calls Remove method of internal `container/list`.List.
+// If Remove returns non-nil value then removed is true, false otherwize.
+// When removed is false returned V is zero of T.
 func (l List[T]) Remove(e Element[T]) (v T, removed bool) {
 	if ele := l.inner.Remove(e.inner); ele != nil {
 		return ele.(T), true

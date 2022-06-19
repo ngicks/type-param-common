@@ -5,9 +5,9 @@ import "github.com/ngicks/type-param-common/heap"
 // MakeHeap makes a heap for the type T using a less[T] function.
 //
 // 1st returned value is struct with basic set of heap methods.
-// 2nd is a point to struct that implements heap.Interface[T] which is used in *HeapWrapper[T].
+// 2nd is one that implements heap.Interface[T] which is used in *HeapWrapper[T].
 // To add your own heap methods, embed *HeapWrapper[T] to your own struct type
-// and manipulate SliceInterface[T].Inner slice in that struct methods with succeeding *HeapWrapper.Init call.
+// and manipulate SliceInterface[T].Inner slice in methods of that struct with succeeding *HeapWrapper.Init call.
 func MakeHeap[T any](less func(i, j T) bool) (*HeapWrapper[T], *SliceInterface[T]) {
 	internal := NewSliceInterface(nil, less)
 	return NewHeapWrapper[T](internal), internal

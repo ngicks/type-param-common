@@ -105,7 +105,7 @@ func TestMapRace(t *testing.T) {
 	m := sync.Map[time.Time, *bytes.Buffer]{}
 	now := time.Now()
 
-	randomMethodCall := func() {
+	callAllMethodsInRandomOrder := func() {
 		keyOrder := map[int]any{
 			0: nil,
 			1: nil,
@@ -138,7 +138,7 @@ func TestMapRace(t *testing.T) {
 	for i := 0; i < 1000; i++ {
 		wg.Add(1)
 		go func() {
-			randomMethodCall()
+			callAllMethodsInRandomOrder()
 			wg.Done()
 		}()
 	}

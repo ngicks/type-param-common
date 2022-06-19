@@ -69,7 +69,7 @@ func TestPoolWithoutNew(t *testing.T) {
 	}
 
 	// If race build flag is enabled, Put drops random x elements.
-	// We can't rely on how many we put it to the pool.
+	// We can't rely on how many we put them into the pool.
 	p.Put(bytes.NewBuffer([]byte{}))
 	p.Put(bytes.NewBuffer([]byte{}))
 	p.Put(bytes.NewBuffer([]byte{}))
@@ -97,7 +97,7 @@ func TestPoolRace(t *testing.T) {
 
 	getWithRandomSleep := func() {
 		b := p.Get()
-		time.Sleep(time.Duration(rand.Int63n(1000)))
+		time.Sleep(time.Duration(rand.Int63n(100)))
 		p.Put(b)
 	}
 

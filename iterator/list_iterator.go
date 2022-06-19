@@ -9,6 +9,9 @@ type ListIter[T any] struct {
 	eleBack  list.Element[T]
 }
 
+// FromList makes ListIter from list.List[T].
+// Range is fixed at the time FromList returns.
+// Mutating passed list outside this iterator may cause undefined behavior.
 func FromList[T any](list list.List[T]) *ListIter[T] {
 	return &ListIter[T]{
 		listLen:  list.Len(),
