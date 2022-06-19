@@ -5,7 +5,7 @@ import (
 	"testing"
 
 	"github.com/ngicks/type-param-common/iterator"
-	"github.com/ngicks/type-param-common/list"
+	list "github.com/ngicks/type-param-common/list-param"
 )
 
 func testIteratorBasic[T any](t *testing.T, iter iterator.Nexter[T], expected any) {

@@ -1,6 +1,6 @@
 package typeparamcommon
 
-import "github.com/ngicks/type-param-common/heap"
+import heapparam "github.com/ngicks/type-param-common/heap-param"
 
 // MakeHeap makes a heap for the type T using a less[T] function.
 //
@@ -44,32 +44,32 @@ func MakeMaxHeap[T Lessable]() (*HeapWrapper[T], *SliceInterface[T]) {
 }
 
 type HeapWrapper[T any] struct {
-	inter heap.Interface[T]
+	inter heapparam.Interface[T]
 }
 
-func NewHeapWrapper[T any](inter heap.Interface[T]) *HeapWrapper[T] {
+func NewHeapWrapper[T any](inter heapparam.Interface[T]) *HeapWrapper[T] {
 	return &HeapWrapper[T]{
 		inter: inter,
 	}
 }
 
 func (hw *HeapWrapper[T]) Fix(i int) {
-	heap.Fix(hw.inter, i)
+	heapparam.Fix(hw.inter, i)
 }
 func (hw *HeapWrapper[T]) Init() {
-	heap.Init(hw.inter)
+	heapparam.Init(hw.inter)
 }
 func (hw *HeapWrapper[T]) Pop() T {
-	return heap.Pop(hw.inter)
+	return heapparam.Pop(hw.inter)
 }
 func (hw *HeapWrapper[T]) Push(x T) {
-	heap.Push(hw.inter, x)
+	heapparam.Push(hw.inter, x)
 }
 func (hw *HeapWrapper[T]) Remove(i int) T {
-	return heap.Remove(hw.inter, i)
+	return heapparam.Remove(hw.inter, i)
 }
 
-var _ heap.Interface[int] = NewSliceInterface[int](nil, nil)
+var _ heapparam.Interface[int] = NewSliceInterface[int](nil, nil)
 
 type SliceInterface[T any] struct {
 	Inner []T

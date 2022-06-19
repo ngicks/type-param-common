@@ -1,13 +1,13 @@
-package sync_test
+package syncparam_test
 
 import (
 	"bytes"
 	"reflect"
-	sync_ "sync"
+	"sync"
 	"testing"
 	"time"
 
-	"github.com/ngicks/type-param-common/sync"
+	syncparam "github.com/ngicks/type-param-common/sync-param"
 )
 
 type kv[K, V any] struct {
@@ -15,7 +15,7 @@ type kv[K, V any] struct {
 	Value V
 }
 
-func mapTestSet[K, V any](t *testing.T, m sync.Map[K, V], keyValues ...kv[K, V]) {
+func mapTestSet[K, V any](t *testing.T, m syncparam.Map[K, V], keyValues ...kv[K, V]) {
 	if len(keyValues) < 3 {
 		panic("keyValues must be length of 3 or more")
 	}
@@ -90,7 +90,7 @@ func mapTestSet[K, V any](t *testing.T, m sync.Map[K, V], keyValues ...kv[K, V])
 }
 
 func TestMap(t *testing.T) {
-	m := sync.Map[string, time.Time]{}
+	m := syncparam.Map[string, time.Time]{}
 	now := time.Now()
 	mapTestSet(t, m,
 		[]kv[string, time.Time]{
@@ -102,7 +102,7 @@ func TestMap(t *testing.T) {
 }
 
 func TestMapRace(t *testing.T) {
-	m := sync.Map[time.Time, *bytes.Buffer]{}
+	m := syncparam.Map[time.Time, *bytes.Buffer]{}
 	now := time.Now()
 
 	callAllMethodsInRandomOrder := func() {
@@ -134,7 +134,7 @@ func TestMapRace(t *testing.T) {
 		}
 	}
 
-	wg := sync_.WaitGroup{}
+	wg := sync.WaitGroup{}
 	for i := 0; i < 1000; i++ {
 		wg.Add(1)
 		go func() {

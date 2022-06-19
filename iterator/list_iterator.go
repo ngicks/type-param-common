@@ -1,6 +1,8 @@
 package iterator
 
-import "github.com/ngicks/type-param-common/list"
+import (
+	list "github.com/ngicks/type-param-common/list-param"
+)
 
 type ListIter[T any] struct {
 	listLen  int

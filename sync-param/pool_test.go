@@ -1,19 +1,19 @@
-package sync_test
+package syncparam_test
 
 import (
 	"bytes"
 	"math/rand"
-	sync_ "sync"
+	"sync"
 	"sync/atomic"
 	"testing"
 	"time"
 
-	"github.com/ngicks/type-param-common/sync"
+	syncparam "github.com/ngicks/type-param-common/sync-param"
 )
 
 func TestPool(t *testing.T) {
 	var newCallCount, curCallCount, prevCallCount int64
-	p := sync.NewPool(func() *bytes.Buffer {
+	p := syncparam.NewPool(func() *bytes.Buffer {
 		atomic.AddInt64(&newCallCount, 1)
 		return bytes.NewBuffer([]byte{})
 	})
@@ -60,7 +60,7 @@ func TestPool(t *testing.T) {
 }
 
 func TestPoolWithoutNew(t *testing.T) {
-	p := sync.NewPool[*bytes.Buffer](nil)
+	p := syncparam.NewPool[*bytes.Buffer](nil)
 
 	for i := 0; i < 20; i++ {
 		if got := p.Get(); got != nil {
@@ -91,7 +91,7 @@ func TestPoolWithoutNew(t *testing.T) {
 }
 
 func TestPoolRace(t *testing.T) {
-	p := sync.NewPool(func() *bytes.Buffer {
+	p := syncparam.NewPool(func() *bytes.Buffer {
 		return bytes.NewBuffer([]byte{})
 	})
 
@@ -101,7 +101,7 @@ func TestPoolRace(t *testing.T) {
 		p.Put(b)
 	}
 
-	wg := sync_.WaitGroup{}
+	wg := sync.WaitGroup{}
 	for i := 0; i < 1000; i++ {
 		wg.Add(1)
 		go func() {

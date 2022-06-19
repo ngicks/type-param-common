@@ -1,4 +1,4 @@
-package list
+package listparam
 
 import "container/list"
 

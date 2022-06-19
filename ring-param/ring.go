@@ -1,4 +1,4 @@
-package ring
+package ringparam
 
 import "container/ring"
 

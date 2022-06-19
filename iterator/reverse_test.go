@@ -4,7 +4,7 @@ import (
 	"testing"
 
 	"github.com/ngicks/type-param-common/iterator"
-	"github.com/ngicks/type-param-common/list"
+	list "github.com/ngicks/type-param-common/list-param"
 )
 
 func TestReverse(t *testing.T) {

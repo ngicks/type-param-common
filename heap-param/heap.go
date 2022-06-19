@@ -1,4 +1,4 @@
-package heap
+package heapparam
 
 import (
 	"container/heap"

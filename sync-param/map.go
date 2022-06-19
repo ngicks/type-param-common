@@ -1,11 +1,11 @@
-package sync
+package syncparam
 
 import (
-	sync_ "sync"
+	"sync"
 )
 
 type Map[K, V any] struct {
-	inner sync_.Map
+	inner sync.Map
 }
 
 func (m *Map[K, V]) Delete(key K) {

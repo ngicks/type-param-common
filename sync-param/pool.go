@@ -1,4 +1,4 @@
-package sync
+package syncparam
 
 import (
 	sync_ "sync"
