@@ -37,14 +37,6 @@ type IterTaker[T any] interface {
 	TakeWhile(skipIf func(T) bool) WhileTaker[T]
 }
 
-type IteratorMethodSet[T any] interface {
-	Nexter[T]
-	NextBacker[T]
-	IterReverser[T]
-	IterSelector[T]
-	IterExcluder[T]
-}
-
 // Doubly ended iterator.
 type DeIterator[T any] interface {
 	Nexter[T]
