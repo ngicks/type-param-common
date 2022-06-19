@@ -44,10 +44,10 @@ func NewSelector[T any](iter DeIterator[T], selector func(T) bool) Selector[T] {
 	}
 }
 
-func (s Selector[T]) next(nexter nextFunc[T]) (next T, ok bool) {
+func (s Selector[T]) next(nextFn nextFunc[T]) (next T, ok bool) {
 	var v T
 	for {
-		v, ok = nexter()
+		v, ok = nextFn()
 		if !ok {
 			return
 		}

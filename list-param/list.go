@@ -116,7 +116,7 @@ func (l List[T]) PushFrontList(other List[T]) {
 
 // Remove calls Remove method of internal `container/list`.List.
 // If Remove returns non-nil value then removed is true, false otherwize.
-// When removed is false returned V is zero of T.
+// When removed is false returned v is zero of T.
 func (l List[T]) Remove(e Element[T]) (v T, removed bool) {
 	if ele := l.inner.Remove(e.inner); ele != nil {
 		return ele.(T), true
