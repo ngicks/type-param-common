@@ -24,7 +24,7 @@ func (li *ListIter[T]) Next() (next T, ok bool) {
 	if li.eleFront.Unwrap() == li.eleBack.Unwrap() {
 		li.done = true
 	}
-	next = li.eleFront.Get()
+	next, _ = li.eleFront.Get()
 	ok = true
 	li.eleFront = li.eleFront.Next()
 	return
@@ -36,7 +36,7 @@ func (li *ListIter[T]) NextBack() (next T, ok bool) {
 	if li.eleFront.Unwrap() == li.eleBack.Unwrap() {
 		li.done = true
 	}
-	next = li.eleBack.Get()
+	next, _ = li.eleBack.Get()
 	ok = true
 	li.eleBack = li.eleBack.Prev()
 	return

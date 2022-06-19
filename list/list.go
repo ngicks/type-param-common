@@ -15,11 +15,11 @@ func NewElement[T any]() Element[T] {
 func (e Element[T]) Unwrap() *list.Element {
 	return e.inner
 }
-func (e Element[T]) Get() (v T) {
+func (e Element[T]) Get() (v T, ok bool) {
 	if e.inner.Value == nil {
 		return
 	} else {
-		return e.inner.Value.(T)
+		return e.inner.Value.(T), true
 	}
 }
 func (e Element[T]) Set(v T) {
@@ -101,9 +101,9 @@ func (l List[T]) PushFront(v T) Element[T] {
 func (l List[T]) PushFrontList(other List[T]) {
 	l.inner.PushFrontList(other.inner)
 }
-func (l List[T]) Remove(e Element[T]) (v T) {
+func (l List[T]) Remove(e Element[T]) (v T, removed bool) {
 	if ele := l.inner.Remove(e.inner); ele != nil {
-		return ele.(T)
+		return ele.(T), true
 	} else {
 		return
 	}

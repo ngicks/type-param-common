@@ -58,7 +58,8 @@ func TestList(t *testing.T) {
 	// Check standard iteration.
 	sum := 0
 	for e := l.Front(); e.Unwrap() != nil; e = e.Next() {
-		if i, ok := e.Get().(int); ok {
+		got, _ := e.Get()
+		if i, ok := got.(int); ok {
 			sum += i
 		}
 	}
@@ -81,7 +82,7 @@ func checkList(t *testing.T, l List[int], es []int) {
 
 	i := 0
 	for e := l.Front(); e.Unwrap() != nil; e = e.Next() {
-		le := e.Get()
+		le, _ := e.Get()
 		if le != es[i] {
 			t.Errorf("elt[%d].Value = %v, want %v", i, le, es[i])
 		}
@@ -162,8 +163,8 @@ func TestIssue6349(t *testing.T) {
 
 	e := l.Front()
 	l.Remove(e)
-	if e.Get() != 1 {
-		t.Errorf("e.value = %d, want 1", e.Get())
+	if got, _ := e.Get(); got != 1 {
+		t.Errorf("e.value = %d, want 1", got)
 	}
 	if e.Next().Unwrap() != nil {
 		t.Errorf("e.Next() != nil")

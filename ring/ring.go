@@ -14,22 +14,22 @@ func New[T any](n int) Ring[T] {
 func (r Ring[T]) Unwrap() *ring.Ring {
 	return r.inner
 }
-func (r Ring[T]) Get() (v T) {
+func (r Ring[T]) Get() (v T, ok bool) {
 	if r.inner.Value == nil {
 		return
 	}
-	return r.inner.Value.(T)
+	return r.inner.Value.(T), true
 }
 func (r Ring[T]) Set(v T) {
 	r.inner.Value = v
 }
-func (r Ring[T]) Do(f func(T)) {
+func (r Ring[T]) Do(f func(v T, hasValue bool)) {
 	r.inner.Do(func(a any) {
-		var zero T
 		if a == nil {
-			f(zero)
+			var zero T
+			f(zero, false)
 		} else {
-			f(a.(T))
+			f(a.(T), true)
 		}
 	})
 }
