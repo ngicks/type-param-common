@@ -4,12 +4,12 @@ import (
 	"testing"
 
 	"github.com/ngicks/type-param-common/iterator"
-	list "github.com/ngicks/type-param-common/list-param"
+	listparam "github.com/ngicks/type-param-common/list-param"
 )
 
 func TestReverse(t *testing.T) {
 	expected := []int{1, 2, 3, 4, 5}
-	intLis := list.New[int]()
+	intLis := listparam.New[int]()
 	for _, v := range expected {
 		intLis.PushBack(v)
 	}

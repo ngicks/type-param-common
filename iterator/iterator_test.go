@@ -5,7 +5,7 @@ import (
 	"testing"
 
 	"github.com/ngicks/type-param-common/iterator"
-	list "github.com/ngicks/type-param-common/list-param"
+	listparam "github.com/ngicks/type-param-common/list-param"
 )
 
 func testIteratorBasic[T any](t *testing.T, iter iterator.Nexter[T], expected any) {
@@ -24,7 +24,7 @@ func TestIterator(t *testing.T) {
 	iterSlice := iterator.FromSlice(expected)
 	testIteratorBasic[int](t, iterSlice, expected)
 
-	intLis := list.New[int]()
+	intLis := listparam.New[int]()
 	for _, v := range expected {
 		intLis.PushBack(v)
 	}
@@ -65,7 +65,7 @@ func TestIterBack(t *testing.T) {
 	iterSlice := iterator.FromSlice(expected)
 	testIterBack(t, iterSlice)
 
-	intLis := list.New[int]()
+	intLis := listparam.New[int]()
 	for _, v := range expected {
 		intLis.PushBack(v)
 	}
