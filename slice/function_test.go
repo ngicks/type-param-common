@@ -15,10 +15,10 @@ func TestFunc(t *testing.T) {
 	if slice.Has(sl, 10) {
 		t.Fatalf("must be false")
 	}
-	if slice.Find(sl, 1) != 0 {
-		t.Fatalf("must be 0, but %d", slice.Find(sl, 1))
+	if slice.FindIndex(sl, 1) != 0 {
+		t.Fatalf("must be 0, but %d", slice.FindIndex(sl, 1))
 	}
-	if slice.FindLast(sl, 1) != 4 {
-		t.Fatalf("must be 4, but %d", slice.FindLast(sl, 1))
+	if slice.FindIndexLast(sl, 1) != 4 {
+		t.Fatalf("must be 4, but %d", slice.FindIndexLast(sl, 1))
 	}
 }
