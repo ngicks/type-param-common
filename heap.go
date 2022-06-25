@@ -1,6 +1,9 @@
 package typeparamcommon
 
-import heapparam "github.com/ngicks/type-param-common/heap-param"
+import (
+	heapparam "github.com/ngicks/type-param-common/heap-param"
+	"golang.org/x/exp/constraints"
+)
 
 // MakeHeap makes a heap for the type T using a less[T] function.
 //
@@ -13,17 +16,11 @@ func MakeHeap[T any](less func(i, j T) bool) (*HeapWrapper[T], *SliceInterface[T
 	return NewHeapWrapper[T](internal), internal
 }
 
-type Lessable interface {
-	~int | ~int8 | ~int16 | ~int32 | ~int64 |
-		~float32 | ~float64 | ~string | ~uint |
-		~uint8 | ~uint16 | ~uint32 | ~uint64 | ~uintptr
-}
-
-func less[T Lessable](i, j T) bool {
+func less[T constraints.Ordered](i, j T) bool {
 	return i < j
 }
 
-func more[T Lessable](i, j T) bool {
+func more[T constraints.Ordered](i, j T) bool {
 	return i > j
 }
 
@@ -31,14 +28,14 @@ func more[T Lessable](i, j T) bool {
 //
 // MakeMinHeap does what MakeHeap does but with predeclared less function.
 // T is constrained to predeclared primitive types which are compatible with less and greater comparison operations.
-func MakeMinHeap[T Lessable]() (*HeapWrapper[T], *SliceInterface[T]) {
+func MakeMinHeap[T constraints.Ordered]() (*HeapWrapper[T], *SliceInterface[T]) {
 	internal := NewSliceInterface(nil, less[T])
 	return NewHeapWrapper[T](internal), internal
 }
 
 // MakeMaxHeap makes a maxheap for the type T.
 // This is same as MakeMinHeap but uses more[T] instead.
-func MakeMaxHeap[T Lessable]() (*HeapWrapper[T], *SliceInterface[T]) {
+func MakeMaxHeap[T constraints.Ordered]() (*HeapWrapper[T], *SliceInterface[T]) {
 	internal := NewSliceInterface(nil, more[T])
 	return NewHeapWrapper[T](internal), internal
 }
