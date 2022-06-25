@@ -27,7 +27,7 @@ func (r Ring[T]) Get() (v T, ok bool) {
 	return r.inner.Value.(T), true
 }
 
-// Clear is equivalent to `ring.Value = v`
+// Set is equivalent to `ring.Value = v`
 func (r Ring[T]) Set(v T) {
 	r.inner.Value = v
 }

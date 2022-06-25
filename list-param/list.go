@@ -28,7 +28,7 @@ func (e Element[T]) Get() (v T, ok bool) {
 	}
 }
 
-// Clear is equivalent to `element.Value = v`
+// Set is equivalent to `element.Value = v`
 func (e Element[T]) Set(v T) {
 	e.inner.Value = v
 }
