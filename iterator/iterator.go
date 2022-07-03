@@ -1,5 +1,7 @@
 package iterator
 
+//go:generate go run ../cmd/lenner/lenner.go -i . -ignore "lenner.go,zip.go"  -o lenner.go
+
 // nextFunc should be type alias but Go does not provide aliasing for type-param func at the time.
 type nextFunc[T any] func() (next T, ok bool)
 
