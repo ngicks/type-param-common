@@ -80,3 +80,8 @@ func (iter Iterator[T]) Collect() []T {
 	}
 	return collected
 }
+func (iter Iterator[T]) Zip(z Iterator[T]) Iterator[T] {
+	return Iterator[T]{
+		DeIterator: NewZipper[T](iter.DeIterator, z),
+	}
+}

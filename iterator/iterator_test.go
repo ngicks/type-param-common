@@ -19,6 +19,17 @@ func testIteratorBasic[T any](t *testing.T, iter iterator.Nexter[T], expected an
 	}
 }
 
+func testIteratorBasicBack[T any](t *testing.T, iter iterator.NextBacker[T], expected any) {
+	earned := make([]T, 0)
+	for next, ok := iter.NextBack(); ok; next, ok = iter.NextBack() {
+		earned = append(earned, next)
+	}
+
+	if !reflect.DeepEqual(earned, expected) {
+		t.Fatalf("interator incorrect behavior: expected = %v, actual = %v", expected, earned)
+	}
+}
+
 func TestIterator(t *testing.T) {
 	expected := []int{1, 2, 3, 4, 5}
 	iterSlice := iterator.FromSlice(expected)
