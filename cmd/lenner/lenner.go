@@ -30,12 +30,12 @@ func main() {
 	}
 }
 
-func _main() (err error) {
+func _main() error {
 	flag.Parse()
 
 	content, err := readDir(*inputDir)
 	if err != nil {
-		return
+		return err
 	}
 
 	fset := token.NewFileSet()
@@ -45,20 +45,18 @@ func _main() (err error) {
 	templateParams := make([]TemplateParam, 0)
 
 	for _, filename := range content {
-		var file *os.File
-		file, err = os.Open(filename)
+		file, err := os.Open(filename)
 		if err != nil {
-			return
+			return err
 		}
-		var tmplParam []TemplateParam
-		var pName string
-		pName, tmplParam, err = getTemplateParam(fset, filename, file)
+		pName, tmplParam, err := getTemplateParam(fset, filename, file)
+		if err != nil {
+			return err
+		}
 		if pName != "" && !strings.HasSuffix(pName, "_test") {
 			packageName = pName
 		}
-		if err != nil {
-			return
-		}
+
 		if tmplParam != nil {
 			templateParams = append(templateParams, tmplParam...)
 		}
@@ -70,10 +68,10 @@ func _main() (err error) {
 	} else {
 		out, err = os.Create(*outFile)
 		if err != nil {
-			return
+			return err
 		}
 	}
-	return writeCode(out, packageName, templateParams)
+	return executeLennerTemplate(out, packageName, templateParams)
 }
 
 func readDir(dir string) (content []string, err error) {
@@ -186,7 +184,7 @@ func ({{.ReceiverName}} {{.TypeName}}[{{.TypeParams}}]) Len() int {
 }
 `))
 
-func writeCode(w io.Writer, packageName string, templateParams []TemplateParam) (err error) {
+func executeLennerTemplate(w io.Writer, packageName string, templateParams []TemplateParam) (err error) {
 	_, err = fmt.Fprintf(w, "package %s\n", packageName)
 	if err != nil {
 		return err
