@@ -82,8 +82,8 @@ func (iter Iterator[T]) Collect() []T {
 	}
 	return collected
 }
-func (iter Iterator[T]) Zip(z Iterator[T]) Iterator[T] {
+func (iter Iterator[T]) Chain(z Iterator[T]) Iterator[T] {
 	return Iterator[T]{
-		DeIterator: NewZipper[T](iter.DeIterator, z),
+		DeIterator: NewChainer[T](iter.DeIterator, z),
 	}
 }

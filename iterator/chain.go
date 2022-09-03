@@ -1,20 +1,20 @@
 package iterator
 
-type Zipper[T any] struct {
+type Chainer[T any] struct {
 	isFormerExhausted bool
 	isLatterExhausted bool
 	former            DeIterator[T]
 	latter            DeIterator[T]
 }
 
-func NewZipper[T any](former DeIterator[T], latter DeIterator[T]) *Zipper[T] {
-	return &Zipper[T]{
+func NewChainer[T any](former DeIterator[T], latter DeIterator[T]) *Chainer[T] {
+	return &Chainer[T]{
 		former: former,
 		latter: latter,
 	}
 }
 
-func (iter *Zipper[T]) Len() int {
+func (iter *Chainer[T]) Len() int {
 	lennerFormer, ok := iter.former.(Lenner)
 	if !ok {
 		return -1
@@ -31,18 +31,18 @@ func (iter *Zipper[T]) Len() int {
 	return formerLen + latterLen
 }
 
-func (z *Zipper[T]) next(
-	nextFnFoermer, nextFnLatter nextFunc[T],
-	isExhausted func() bool,
-	setExhausted func(),
+func (z *Chainer[T]) next(
+	nextFnFormer, nextFnLatter nextFunc[T],
+	isFormerExhausted func() bool,
+	setFormerExhausted func(),
 ) (next T, ok bool) {
 	var v T
-	if !isExhausted() {
-		v, ok = nextFnFoermer()
+	if !isFormerExhausted() {
+		v, ok = nextFnFormer()
 		if ok {
 			return v, ok
 		}
-		setExhausted()
+		setFormerExhausted()
 	}
 
 	v, ok = nextFnLatter()
@@ -52,7 +52,7 @@ func (z *Zipper[T]) next(
 
 	return
 }
-func (z *Zipper[T]) Next() (next T, ok bool) {
+func (z *Chainer[T]) Next() (next T, ok bool) {
 	return z.next(
 		z.former.Next,
 		z.latter.Next,
@@ -60,7 +60,7 @@ func (z *Zipper[T]) Next() (next T, ok bool) {
 		func() { z.isFormerExhausted = true },
 	)
 }
-func (z *Zipper[T]) NextBack() (next T, ok bool) {
+func (z *Chainer[T]) NextBack() (next T, ok bool) {
 	return z.next(
 		z.latter.NextBack,
 		z.former.NextBack,

@@ -23,15 +23,15 @@ func TestZip(t *testing.T) {
 	expected := []int{1, 2, 3, 4, 5, 10, 11, 12, 13, 14}
 	expectedRev := iterator.Iterator[int]{iterator.FromSlice(expected)}.Reverse().Collect()
 	{
-		iterSliceZipped := iterator.NewZipper[int](iterator.FromSlice(expectedFormer), iterator.FromSlice(expectedLatter))
-		iterListZipped := iterator.NewZipper[int](iterator.FromList(intLisFormer), iterator.FromList(intLisLatter))
+		iterSliceZipped := iterator.NewChainer[int](iterator.FromSlice(expectedFormer), iterator.FromSlice(expectedLatter))
+		iterListZipped := iterator.NewChainer[int](iterator.FromList(intLisFormer), iterator.FromList(intLisLatter))
 
 		testIteratorBasic[int](t, iterSliceZipped, expected)
 		testIteratorBasic[int](t, iterListZipped, expected)
 	}
 	{
-		iterSliceZipped := iterator.NewZipper[int](iterator.FromSlice(expectedFormer), iterator.FromSlice(expectedLatter))
-		iterListZipped := iterator.NewZipper[int](iterator.FromList(intLisFormer), iterator.FromList(intLisLatter))
+		iterSliceZipped := iterator.NewChainer[int](iterator.FromSlice(expectedFormer), iterator.FromSlice(expectedLatter))
+		iterListZipped := iterator.NewChainer[int](iterator.FromList(intLisFormer), iterator.FromList(intLisLatter))
 		testIteratorBasicBack[int](t, iterSliceZipped, expectedRev)
 		testIteratorBasicBack[int](t, iterListZipped, expectedRev)
 	}
