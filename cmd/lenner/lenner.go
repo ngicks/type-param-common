@@ -46,8 +46,8 @@ func _main() error {
 	return methodgenhelper.ExecuteTemplate(
 		out,
 		lennerTemplate,
-		autoGenerationNotice,
 		packageName,
+		autoGenerationNotice,
 		typeInfos,
 	)
 }
