@@ -1,9 +1,11 @@
 package set
 
 import (
+	"reflect"
 	"testing"
 	"time"
 
+	"github.com/ngicks/type-param-common/iterator"
 	"github.com/ngicks/type-param-common/slice"
 )
 
@@ -22,8 +24,59 @@ func init() {
 }
 
 func TestSet(t *testing.T) {
-	set := Set[time.Time]{}
+	set := New[time.Time]()
+	testSetWithTimeKey(t, set)
+}
 
+func TestOrderedSet(t *testing.T) {
+	set := NewOrdered[time.Time]()
+	testSetWithTimeKey(t, set)
+}
+
+func TestOrderedSetOrdering(t *testing.T) {
+	set := NewOrdered[int]()
+
+	set.Add(5)
+	set.Add(4)
+	set.Add(3)
+	set.Add(2)
+	set.Add(1)
+
+	expected := []int{5, 4, 3, 2, 1}
+
+	assertInsertionOerder := func(t *testing.T, set setInterface[int], expected []int) {
+		collected := set.Values().Collect()
+		if !reflect.DeepEqual(expected, collected) {
+			t.Fatalf("must be deeply equal.\nexpected = %+v\nactual = %+v\n", expected, collected)
+		}
+
+		collected = collected[:0]
+
+		set.ForEach(func(v, _ int) {
+			collected = append(collected, v)
+		})
+		if !reflect.DeepEqual(expected, collected) {
+			t.Fatalf("must be deeply equal.\nexpected = %+v\nactual = %+v\n", expected, collected)
+		}
+	}
+
+	for i := 0; i < 100; i++ {
+		assertInsertionOerder(t, set, expected)
+	}
+
+}
+
+type setInterface[T comparable] interface {
+	Len() int
+	Add(v T)
+	Clear()
+	Delete(v T) (deleted bool)
+	ForEach(f func(v T, idx int))
+	Has(v T) (has bool)
+	Values() iterator.Iterator[T]
+}
+
+func testSetWithTimeKey(t *testing.T, set setInterface[time.Time]) {
 	now := time.Now()
 	year, month, day := now.Date()
 	hour, minute, second := now.Clock()
@@ -64,10 +117,15 @@ func TestSet(t *testing.T) {
 		t.Fatalf("must contain")
 	}
 
-	d = d[:]
-	set.ForEach(func(v time.Time) {
+	d = d[:0]
+	idxSl := make([]int, 0)
+	set.ForEach(func(v time.Time, idx int) {
 		d = append(d, v)
+		idxSl = append(idxSl, idx)
 	})
+	if !isSerialSlice(idxSl, 1) || idxSl[0] != 0 {
+		t.Fatalf("index must be 0,1,2,3... but = %+v", idxSl)
+	}
 	if !(slice.Has(d, tgt) && slice.Has(d, tgtInOtherLocation)) {
 		t.Fatalf("must contain")
 	}
@@ -86,4 +144,14 @@ func TestSet(t *testing.T) {
 	if set.Len() != 0 {
 		t.Fatalf("wrong len")
 	}
+}
+
+func isSerialSlice(sl []int, width int) bool {
+	prev := sl[0]
+	for _, v := range sl[1:] {
+		if v-prev != width {
+			return false
+		}
+	}
+	return true
 }
