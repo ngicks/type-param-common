@@ -6,25 +6,22 @@ type Set[T comparable] struct {
 	inner map[T]struct{}
 }
 
-func (s *Set[T]) lazyInit() {
-	if s.inner == nil {
-		s.inner = make(map[T]struct{})
+func New[T comparable]() *Set[T] {
+	return &Set[T]{
+		inner: map[T]struct{}{},
 	}
 }
 
 func (s *Set[T]) Len() int {
-	s.lazyInit()
 	return len(s.inner)
 }
 func (s *Set[T]) Add(v T) {
-	s.lazyInit()
 	s.inner[v] = struct{}{}
 }
 func (s *Set[T]) Clear() {
 	s.inner = make(map[T]struct{})
 }
 func (s *Set[T]) Delete(v T) (deleted bool) {
-	s.lazyInit()
 	_, deleted = s.inner[v]
 	if deleted {
 		delete(s.inner, v)
@@ -33,21 +30,20 @@ func (s *Set[T]) Delete(v T) (deleted bool) {
 }
 
 // Order is undefined.
-func (s *Set[T]) ForEach(f func(v T)) {
-	s.lazyInit()
+func (s *Set[T]) ForEach(f func(v T, idx int)) {
+	var idx int
 	for v := range s.inner {
-		f(v)
+		f(v, idx)
+		idx++
 	}
 }
 func (s *Set[T]) Has(v T) (has bool) {
-	s.lazyInit()
 	_, has = s.inner[v]
 	return
 }
 func (s *Set[T]) Values() iterator.Iterator[T] {
-	s.lazyInit()
 	sl := make([]T, 0)
-	s.ForEach(func(v T) {
+	s.ForEach(func(v T, _ int) {
 		sl = append(sl, v)
 	})
 	return iterator.Iterator[T]{
