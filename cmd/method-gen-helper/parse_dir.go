@@ -11,7 +11,7 @@ import (
 
 func ParseDir(
 	dir string,
-	targetTypeName string,
+	targetTypeName []string,
 	ignoreList []string,
 ) (typeInfos []TypeInfo, packageName string, err error) {
 	filenames, err := readRegualrFiles(dir)

@@ -11,7 +11,7 @@ func ExecuteTemplate(
 	templ *template.Template,
 	packageName string,
 	autoGenerationNotice string,
-	tyInfo []TypeInfo,
+	tyInfo []any,
 ) (err error) {
 	_, err = fmt.Fprintf(w, "package %s\n", packageName)
 	if err != nil {

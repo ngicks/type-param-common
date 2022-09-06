@@ -7,14 +7,15 @@ import (
 	"io"
 	"path/filepath"
 	"strings"
+
+	"github.com/ngicks/type-param-common/slice"
 )
 
 type TypeInfo struct {
-	ReceiverName        string
-	TypeName            string
-	TypeParams          string
-	InnerMemberName     string
-	LennerInterfaceName string
+	TypeName        string
+	TypeParams      string
+	InnerMemberName string
+	StructTyp       *ast.StructType
 }
 
 // ParseTypeInfo traverse through ast of a given file and retrieves TypeInfo that matches to targetTyName.
@@ -22,7 +23,7 @@ func ParseTypeInfo(
 	fset *token.FileSet,
 	direntName string,
 	file io.Reader,
-	targetTypeName string,
+	targetTypeName []string,
 ) (typeInfos []TypeInfo, packageName string, err error) {
 	f, err := parser.ParseFile(fset, filepath.Base(direntName), file, 0)
 	if err != nil {
@@ -58,21 +59,20 @@ func ParseTypeInfo(
 				continue
 			}
 
-			if ident.Name == targetTypeName {
+			if slice.Has(targetTypeName, ident.Name) {
 				var memberName string
 				if len(field.Names) > 0 {
 					memberName = field.Names[0].Name
 				} else {
 					// embedded
-					memberName = targetTypeName
+					memberName = ident.Name
 				}
 
 				t := TypeInfo{
-					ReceiverName:        "iter",
-					TypeName:            typeSpec.Name.Name,
-					TypeParams:          getTypeParam(typeSpec),
-					InnerMemberName:     memberName,
-					LennerInterfaceName: "Lenner",
+					TypeName:        typeSpec.Name.Name,
+					TypeParams:      getTypeParam(typeSpec),
+					InnerMemberName: memberName,
+					StructTyp:       structTy,
 				}
 				typeInfos = append(typeInfos, t)
 			}
