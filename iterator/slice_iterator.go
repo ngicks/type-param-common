@@ -1,23 +1,23 @@
 package iterator
 
-type SliceIter[T any] struct {
+// SliceIterDe is doubly ended iterator,
+// which is made of slice.
+type SliceIterDe[T any] struct {
 	innerSlice []T
 	idxFront   int
 	idxBack    int
 }
 
-// FromSlice makes SliceIter from []T.
-// Range is fixed at the time FromSlice returns.
-// Mutating passed sl outside this iterator may cause undefined behavior.
-func FromSlice[T any](sl []T) *SliceIter[T] {
-	return &SliceIter[T]{
+// FromSlice makes SliceIterDe[T] from []T.
+func FromSlice[T any](sl []T) *SliceIterDe[T] {
+	return &SliceIterDe[T]{
 		innerSlice: sl,
 		idxFront:   0,
 		idxBack:    len(sl) - 1,
 	}
 }
 
-func (si *SliceIter[T]) Next() (next T, ok bool) {
+func (si *SliceIterDe[T]) Next() (next T, ok bool) {
 	if si.idxFront > si.idxBack {
 		return
 	}
@@ -25,7 +25,7 @@ func (si *SliceIter[T]) Next() (next T, ok bool) {
 	si.idxFront++
 	return
 }
-func (si *SliceIter[T]) NextBack() (next T, ok bool) {
+func (si *SliceIterDe[T]) NextBack() (next T, ok bool) {
 	if si.idxFront > si.idxBack {
 		return
 	}
@@ -33,6 +33,14 @@ func (si *SliceIter[T]) NextBack() (next T, ok bool) {
 	si.idxBack--
 	return
 }
-func (si *SliceIter[T]) Len() int {
-	return len(si.innerSlice)
+
+// SizeHint returns size of remaining elements.
+func (si *SliceIterDe[T]) SizeHint() int {
+	return si.idxBack - si.idxFront + 1
+}
+
+func (si *SliceIterDe[T]) ToIterator() Iterator[T] {
+	return Iterator[T]{
+		SeIterator: si,
+	}
 }

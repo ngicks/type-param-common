@@ -83,28 +83,33 @@ func typeInfoToTemplateParam(typInfo []methodgenhelper.TypeInfo) []TemplateParam
 }
 
 var reverserTemplate = template.Must(template.New("v").Funcs(funcMap).Parse(`
-func ({{.ReceiverName}} {{.TypeName}}[{{.TypeParams}}]) Reverse() (rev {{.TypeName}}[{{.TypeParams}}], ok bool) {
+func ({{.ReceiverName}} {{.TypeName}}[{{.TypeParams}}]) ReverseRaw() (rev *{{.TypeName}}[{{.TypeParams}}], ok bool) {
 	reversedInner, ok := Reverse({{.ReceiverName}}.{{.InnerMemberName}})
 	if !ok {
-		return {{.TypeName}}[{{.TypeParams}}]{}, ok
+		return nil, ok
 	}
-	return {{.TypeName}}[{{.TypeParams}}]{
+	return &{{.TypeName}}[{{.TypeParams}}]{
 		{{.InnerMemberName}}: reversedInner,
 {{- range $index, $member := .OtherMembers}}
 		{{$member}}: {{$.ReceiverName}}.{{$member}},
 {{- end}} 
 	}, true
 }
+
+func ({{.ReceiverName}} {{.TypeName}}[{{.TypeParams}}]) Reverse() (rev SeIterator[{{lastTypeParam .TypeParams}}], ok bool) {
+	return {{.ReceiverName}}.ReverseRaw()
+}
 `))
 
 var funcMap = template.FuncMap{
-	"firstTypeParam": firstElementOfCommaSep,
+	"lastTypeParam": lastElementOfCommaSep,
 }
 
-func firstElementOfCommaSep(str string) string {
-	return strings.Trim(firstElement(str, ","), " ")
+func lastElementOfCommaSep(str string) string {
+	return strings.Trim(lastElement(str, ","), " ")
 }
 
-func firstElement(str string, sep string) string {
-	return strings.Split(str, sep)[0]
+func lastElement(str string, sep string) string {
+	sp := strings.Split(str, sep)
+	return sp[len(sp)-1]
 }

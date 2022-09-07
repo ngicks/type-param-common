@@ -47,6 +47,6 @@ func (s *Set[T]) Values() iterator.Iterator[T] {
 		sl = append(sl, v)
 	})
 	return iterator.Iterator[T]{
-		DeIterator: iterator.FromSlice(sl),
+		SeIterator: iterator.FromSlice(sl),
 	}
 }

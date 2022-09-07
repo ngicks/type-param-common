@@ -5,7 +5,9 @@ type ChanIter[T any] struct {
 }
 
 // FromChannel makes ChanIter associated with given channel.
-// To convey end of iterator, close passed channel.
+// To signal end of iterator, close passed channel.
+//
+// *ChanIter[T] only implements SeIterator[T].
 func FromChannel[T any](channel <-chan T) *ChanIter[T] {
 	return &ChanIter[T]{
 		channel: channel,
@@ -19,7 +21,8 @@ func (ci *ChanIter[T]) Next() (next T, ok bool) {
 	return
 }
 
-// NextBack is alias of Next. Reversing ChanIter is no-op.
-func (ci *ChanIter[T]) NextBack() (next T, ok bool) {
-	return ci.Next()
+func (ci *ChanIter[T]) ToIterator() Iterator[T] {
+	return Iterator[T]{
+		SeIterator: ci,
+	}
 }

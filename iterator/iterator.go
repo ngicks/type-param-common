@@ -1,6 +1,9 @@
 package iterator
 
-//go:generate go run ../cmd/lenner/lenner.go -i . -ignore "lenner.go,chain.go"  -o lenner.go
+import "fmt"
+
+//go:generate go run ../cmd/sizehinter/sizehinter.go -i . -ignore "sizehinter.go,chain.go,reverser.go,skip.go,take.go"  -o sizehinter.go
+//go:generate go run ../cmd/reverser/reverser.go -i . -ignore "reverse.go,iterator.go,sizehinter.go,chain.go,reverser.go"  -o reverser.go
 
 // nextFunc should be type alias but Go does not provide aliasing for type-param func at the time.
 type nextFunc[T any] func() (next T, ok bool)
@@ -12,31 +15,21 @@ type NextBacker[T any] interface {
 	NextBack() (next T, ok bool)
 }
 
-type Lenner interface {
-	Len() int
+type SizeHinter interface {
+	SizeHint() int
 }
 
-type IterReverser[T any] interface {
-	Reverse() Reverser[T]
-}
-type IterSelector[T any] interface {
-	Select(selector func(T) bool) Selector[T]
-}
-type IterExcluder[T any] interface {
-	Exclude(excluder func(T) bool) Excluder[T]
-}
-type IterMapper[T, U any] interface {
-	Map(mapper func(T) U) Mapper[T, U]
+type Reverser[T any] interface {
+	Reverse() (rev SeIterator[T], ok bool)
 }
 
-type IterSkipper[T any] interface {
-	SkipN() NSkipper[T]
-	SkipWhile(skipIf func(T) bool) WhileSkipper[T]
+type Unwrapper[T any] interface {
+	Unwrap() SeIterator[T]
 }
 
-type IterTaker[T any] interface {
-	TakeN() NTaker[T]
-	TakeWhile(skipIf func(T) bool) WhileTaker[T]
+// Singly ended iterator.
+type SeIterator[T any] interface {
+	Nexter[T]
 }
 
 // Doubly ended iterator.
@@ -46,12 +39,9 @@ type DeIterator[T any] interface {
 }
 
 type Iterator[T any] struct {
-	DeIterator[T]
+	SeIterator[T]
 }
 
-func (iter Iterator[T]) Reverse() Iterator[T] {
-	return Iterator[T]{NewReverser[T](iter)}
-}
 func (iter Iterator[T]) Select(selector func(T) bool) Iterator[T] {
 	return Iterator[T]{NewSelector[T](iter, selector)}
 }
@@ -70,20 +60,75 @@ func (iter Iterator[T]) TakeN(n int) Iterator[T] {
 func (iter Iterator[T]) TakeWhile(takeIf func(T) bool) Iterator[T] {
 	return Iterator[T]{NewWhileTaker[T](iter, takeIf)}
 }
-func (iter Iterator[T]) ForEach(each func(T)) {
-	for next, ok := iter.Next(); ok; next, ok = iter.Next() {
-		each(next)
+func (iter Iterator[T]) Chain(z SeIterator[T]) Iterator[T] {
+	return Iterator[T]{
+		SeIterator: NewChainer(iter.SeIterator, z),
 	}
+}
+
+func (iter Iterator[T]) Unwrap() SeIterator[T] {
+	return iter.SeIterator
+}
+func (iter Iterator[T]) NextMust() T {
+	v, ok := iter.SeIterator.Next()
+	if !ok {
+		panic("NextMust: failed")
+	}
+	return v
+}
+func (iter Iterator[T]) Reverse() (rev Iterator[T], ok bool) {
+	reversed, ok := Reverse(iter.SeIterator)
+	if !ok {
+		return
+	}
+	return Iterator[T]{reversed}, true
+}
+func (iter Iterator[T]) MustReverse() (rev Iterator[T]) {
+	rev, ok := iter.Reverse()
+	if !ok {
+		panic(fmt.Sprintf("MustReverse: failed: %+v", iter))
+	}
+	return
+}
+func (iter Iterator[T]) iterateUntil(predicate func(T) (continueIteration bool)) {
+	for next, ok := iter.Next(); ok; next, ok = iter.Next() {
+		if !predicate(next) {
+			break
+		}
+	}
+}
+func (iter Iterator[T]) ForEach(each func(T)) {
+	iter.iterateUntil(func(t T) bool {
+		each(t)
+		return true
+	})
 }
 func (iter Iterator[T]) Collect() []T {
 	collected := make([]T, 0)
-	for next, ok := iter.Next(); ok; next, ok = iter.Next() {
-		collected = append(collected, next)
-	}
+	iter.iterateUntil(func(t T) bool {
+		collected = append(collected, t)
+		return true
+	})
 	return collected
 }
-func (iter Iterator[T]) Chain(z Iterator[T]) Iterator[T] {
-	return Iterator[T]{
-		DeIterator: NewChainer[T](iter.DeIterator, z),
-	}
+func (iter Iterator[T]) Find(predicate func(T) bool) (v T, found bool) {
+	var lastElement T
+	iter.iterateUntil(func(t T) bool {
+		b := predicate(t)
+		if b {
+			lastElement = t
+			found = true
+		}
+		return !b
+	})
+	return lastElement, found
+}
+
+func (iter Iterator[T]) Reduce(reducer func(accumulator T, next T) T) T {
+	var accum T
+	iter.iterateUntil(func(t T) bool {
+		accum = reducer(accum, t)
+		return true
+	})
+	return accum
 }

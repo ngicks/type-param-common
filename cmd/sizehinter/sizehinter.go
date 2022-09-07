@@ -57,9 +57,9 @@ func _main() error {
 }
 
 var lennerTemplate = template.Must(template.New("v").Parse(`
-func ({{.ReceiverName}} {{.TypeName}}[{{.TypeParams}}]) Len() int {
-	if lenner, ok := {{.ReceiverName}}.{{.InnerMemberName}}.({{.LennerInterfaceName}}); ok {
-		return lenner.Len()
+func ({{.ReceiverName}} {{.TypeName}}[{{.TypeParams}}]) SizeHint() int {
+	if sizehinter, ok := {{.ReceiverName}}.{{.InnerMemberName}}.({{.SizeHinterInterfaceName}}); ok {
+		return sizehinter.SizeHint()
 	}
 	return -1
 }
@@ -68,17 +68,17 @@ func ({{.ReceiverName}} {{.TypeName}}[{{.TypeParams}}]) Len() int {
 type TemplateParam struct {
 	methodgenhelper.TypeInfo
 
-	ReceiverName        string
-	LennerInterfaceName string
+	ReceiverName            string
+	SizeHinterInterfaceName string
 }
 
 func typeInfoToTemplateParam(typInfo []methodgenhelper.TypeInfo) []TemplateParam {
 	ret := []TemplateParam{}
 	for _, v := range typInfo {
 		ret = append(ret, TemplateParam{
-			TypeInfo:            v,
-			ReceiverName:        "iter",
-			LennerInterfaceName: "Lenner",
+			TypeInfo:                v,
+			ReceiverName:            "iter",
+			SizeHinterInterfaceName: "SizeHinter",
 		})
 	}
 	return ret

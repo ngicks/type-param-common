@@ -1,39 +1,83 @@
 package iterator_test
 
 import (
+	"reflect"
 	"testing"
 
 	"github.com/ngicks/type-param-common/iterator"
-	listparam "github.com/ngicks/type-param-common/list-param"
 )
 
-func TestZip(t *testing.T) {
+func TestChain(t *testing.T) {
 	expectedFormer := []int{1, 2, 3, 4, 5}
 	expectedLatter := []int{10, 11, 12, 13, 14}
 
-	intLisFormer := listparam.New[int]()
-	intLisLatter := listparam.New[int]()
-	for _, v := range expectedFormer {
-		intLisFormer.PushBack(v)
-	}
-	for _, v := range expectedLatter {
-		intLisLatter.PushBack(v)
-	}
-
-	expected := []int{1, 2, 3, 4, 5, 10, 11, 12, 13, 14}
-	expectedRev := iterator.Iterator[int]{iterator.FromSlice(expected)}.Reverse().Collect()
 	{
-		iterSliceZipped := iterator.NewChainer[int](iterator.FromSlice(expectedFormer), iterator.FromSlice(expectedLatter))
-		iterListZipped := iterator.NewChainer[int](iterator.FromList(intLisFormer), iterator.FromList(intLisLatter))
+		expected := []int{1, 2, 3, 4, 5, 10, 11, 12, 13, 14}
+		f := iterator.FromSlice(expectedFormer).ToIterator()
+		l := iterator.FromSlice(expectedLatter).ToIterator()
+		chained := f.Chain(l)
 
-		testIteratorBasic[int](t, iterSliceZipped, expected)
-		testIteratorBasic[int](t, iterListZipped, expected)
+		if _, ok := chained.SeIterator.(*iterator.Chainer[int]); !ok {
+			t.Fatalf("internal type must be *iterator.Chainer[int] but %T", chained.SeIterator)
+		}
+
+		collected := chained.Collect()
+		if !reflect.DeepEqual(expected, collected) {
+			t.Fatalf("must be deeply equal. expected = %+v, actual = %+v", expected, collected)
+		}
 	}
 	{
-		iterSliceZipped := iterator.NewChainer[int](iterator.FromSlice(expectedFormer), iterator.FromSlice(expectedLatter))
-		iterListZipped := iterator.NewChainer[int](iterator.FromList(intLisFormer), iterator.FromList(intLisLatter))
-		testIteratorBasicBack[int](t, iterSliceZipped, expectedRev)
-		testIteratorBasicBack[int](t, iterListZipped, expectedRev)
+		expected := []int{10, 11, 12, 13, 14, 1, 2, 3, 4, 5}
+		f := iterator.FromSlice(expectedFormer).ToIterator()
+		l := iterator.FromSlice(expectedLatter).ToIterator()
+		chained := l.Chain(f)
+
+		if _, ok := chained.SeIterator.(*iterator.Chainer[int]); !ok {
+			t.Fatalf("internal type must be *iterator.Chainer[int] but %T", chained.SeIterator)
+		}
+
+		collected := chained.Collect()
+		if !reflect.DeepEqual(expected, collected) {
+			t.Fatalf("must be deeply equal. expected = %+v, actual = %+v", expected, collected)
+		}
+
 	}
 
+}
+
+func TestChainReversed(t *testing.T) {
+	expectedFormer := []int{1, 2, 3, 4, 5}
+	expectedLatter := []int{10, 11, 12, 13, 14}
+	expected := []int{1, 2, 14, 13, 3, 4, 5, 12, 11, 10}
+
+	f := iterator.FromSlice(expectedFormer).ToIterator()
+	l := iterator.FromSlice(expectedLatter).ToIterator()
+	chained := f.Chain(l)
+
+	answer := []int{}
+
+	answer = append(answer, chained.NextMust())
+	answer = append(answer, chained.NextMust())
+	chained = chained.MustReverse()
+	answer = append(answer, chained.NextMust())
+	answer = append(answer, chained.NextMust())
+	chained = chained.MustReverse()
+	answer = append(answer, chained.NextMust())
+	answer = append(answer, chained.NextMust())
+	answer = append(answer, chained.NextMust())
+	chained = chained.MustReverse()
+	answer = append(answer, chained.NextMust())
+	answer = append(answer, chained.NextMust())
+	answer = append(answer, chained.NextMust())
+
+	if _, ok := chained.Next(); ok {
+		t.Fatal("must be drained")
+	}
+	if _, ok := chained.MustReverse().Next(); ok {
+		t.Fatal("must be drained")
+	}
+
+	if !reflect.DeepEqual(expected, answer) {
+		t.Fatalf("must be deeply equal. expected = %+v, actual = %+v", expected, answer)
+	}
 }

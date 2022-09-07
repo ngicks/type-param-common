@@ -1,15 +1,30 @@
 package iterator
 
 type NSkipper[T any] struct {
-	inner DeIterator[T]
+	inner SeIterator[T]
 	n     int
 }
 
-func NewNSkipper[T any](iter DeIterator[T], n int) *NSkipper[T] {
+func NewNSkipper[T any](iter SeIterator[T], n int) *NSkipper[T] {
 	return &NSkipper[T]{
 		inner: iter,
 		n:     n,
 	}
+}
+
+func (iter *NSkipper[T]) SizeHint() int {
+	if lenner, ok := iter.inner.(SizeHinter); ok {
+		l := lenner.SizeHint()
+		if l > iter.n {
+			if iter.n <= 0 {
+				return l
+			}
+			return l - iter.n
+		} else {
+			return 0
+		}
+	}
+	return -1
 }
 
 func (s *NSkipper[T]) next(nextFn nextFunc[T]) (next T, ok bool) {
@@ -28,21 +43,22 @@ func (s *NSkipper[T]) next(nextFn nextFunc[T]) (next T, ok bool) {
 func (s *NSkipper[T]) Next() (next T, ok bool) {
 	return s.next(s.inner.Next)
 }
-func (s *NSkipper[T]) NextBack() (next T, ok bool) {
-	return s.next(s.inner.NextBack)
-}
 
 type WhileSkipper[T any] struct {
-	inner        DeIterator[T]
+	inner        SeIterator[T]
 	isOutOfWhile bool
 	skipIf       func(T) bool
 }
 
-func NewWhileSkipper[T any](iter DeIterator[T], skipIf func(T) bool) *WhileSkipper[T] {
+func NewWhileSkipper[T any](iter SeIterator[T], skipIf func(T) bool) *WhileSkipper[T] {
 	return &WhileSkipper[T]{
 		inner:  iter,
 		skipIf: skipIf,
 	}
+}
+
+func (s WhileSkipper[T]) Len() int {
+	return -1
 }
 
 func (s *WhileSkipper[T]) next(nextFn nextFunc[T]) (next T, ok bool) {
@@ -67,7 +83,4 @@ func (s *WhileSkipper[T]) next(nextFn nextFunc[T]) (next T, ok bool) {
 
 func (s *WhileSkipper[T]) Next() (next T, ok bool) {
 	return s.next(s.inner.Next)
-}
-func (s *WhileSkipper[T]) NextBack() (next T, ok bool) {
-	return s.next(s.inner.NextBack)
 }

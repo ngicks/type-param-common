@@ -1,25 +1,32 @@
 package iterator
 
 type NTaker[T any] struct {
-	inner DeIterator[T]
+	inner SeIterator[T]
 	n     int
 }
 
-func NewNTaker[T any](iter DeIterator[T], n int) *NTaker[T] {
+func NewNTaker[T any](iter SeIterator[T], n int) *NTaker[T] {
 	return &NTaker[T]{
 		inner: iter,
 		n:     n,
 	}
 }
 
-func (s *NTaker[T]) next(nextFn nextFunc[T]) (next T, ok bool) {
+func (t *NTaker[T]) SizeHint() int {
+	if lenner, ok := t.inner.(SizeHinter); ok {
+		return lenner.SizeHint()
+	}
+	return -1
+}
+
+func (t *NTaker[T]) next(nextFn nextFunc[T]) (next T, ok bool) {
 	var v T
 	v, ok = nextFn()
 	if !ok {
 		return
 	}
-	if s.n > 0 {
-		s.n--
+	if t.n > 0 {
+		t.n--
 		return v, ok
 	}
 	return
@@ -27,44 +34,45 @@ func (s *NTaker[T]) next(nextFn nextFunc[T]) (next T, ok bool) {
 func (s *NTaker[T]) Next() (next T, ok bool) {
 	return s.next(s.inner.Next)
 }
-func (s *NTaker[T]) NextBack() (next T, ok bool) {
-	return s.next(s.inner.NextBack)
-}
 
 type WhileTaker[T any] struct {
-	inner        DeIterator[T]
+	inner        SeIterator[T]
 	isOutOfWhile bool
 	takeIf       func(T) bool
 }
 
-func NewWhileTaker[T any](iter DeIterator[T], takeIf func(T) bool) *WhileTaker[T] {
+func NewWhileTaker[T any](iter SeIterator[T], takeIf func(T) bool) *WhileTaker[T] {
 	return &WhileTaker[T]{
 		inner:  iter,
 		takeIf: takeIf,
 	}
 }
 
-func (s *WhileTaker[T]) next(nextFn nextFunc[T]) (next T, ok bool) {
+func (t WhileTaker[T]) SizeHint() int {
+	if lenner, ok := t.inner.(SizeHinter); ok {
+		return lenner.SizeHint()
+	}
+	return -1
+}
+
+func (t *WhileTaker[T]) next(nextFn nextFunc[T]) (next T, ok bool) {
 	var v T
-	if s.isOutOfWhile {
+	if t.isOutOfWhile {
 		return
 	}
 
 	v, ok = nextFn()
 	if !ok {
-		s.isOutOfWhile = true
+		t.isOutOfWhile = true
 		return
 	}
-	if s.takeIf(v) {
+	if t.takeIf(v) {
 		return v, ok
 	}
-	s.isOutOfWhile = true
+	t.isOutOfWhile = true
 	return next, false
 }
 
 func (s *WhileTaker[T]) Next() (next T, ok bool) {
 	return s.next(s.inner.Next)
-}
-func (s *WhileTaker[T]) NextBack() (next T, ok bool) {
-	return s.next(s.inner.NextBack)
 }

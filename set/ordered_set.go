@@ -7,37 +7,37 @@ import (
 
 // OrderedSet is same as Set but remembers insertion order.
 type OrderedSet[T comparable] struct {
-	insertionOrder    listparam.List[T]
-	insertionOrderMap map[T]listparam.Element[T]
+	order  listparam.List[T]
+	eleMap map[T]listparam.Element[T]
 }
 
 func NewOrdered[T comparable]() *OrderedSet[T] {
 	return &OrderedSet[T]{
-		insertionOrder:    listparam.New[T](),
-		insertionOrderMap: make(map[T]listparam.Element[T]),
+		order:  listparam.New[T](),
+		eleMap: make(map[T]listparam.Element[T]),
 	}
 }
 
 func (s *OrderedSet[T]) Len() int {
-	return len(s.insertionOrderMap)
+	return len(s.eleMap)
 }
 
 func (s *OrderedSet[T]) Add(v T) {
-	_, has := s.insertionOrderMap[v]
+	_, has := s.eleMap[v]
 	if !has {
-		ele := s.insertionOrder.PushBack(v)
-		s.insertionOrderMap[v] = ele
+		ele := s.order.PushBack(v)
+		s.eleMap[v] = ele
 	}
 }
 func (s *OrderedSet[T]) Clear() {
-	s.insertionOrder = s.insertionOrder.Init()
-	s.insertionOrderMap = make(map[T]listparam.Element[T])
+	s.order = s.order.Init()
+	s.eleMap = make(map[T]listparam.Element[T])
 }
 func (s *OrderedSet[T]) Delete(v T) (deleted bool) {
-	ele, deleted := s.insertionOrderMap[v]
+	ele, deleted := s.eleMap[v]
 	if deleted {
-		s.insertionOrder.Remove(ele)
-		delete(s.insertionOrderMap, v)
+		s.order.Remove(ele)
+		delete(s.eleMap, v)
 	}
 	return
 }
@@ -46,14 +46,14 @@ func (s *OrderedSet[T]) Delete(v T) (deleted bool) {
 // Order is FIFO. Call of Add with existing v does not change order.
 func (s *OrderedSet[T]) ForEach(f func(v T, idx int)) {
 	var idx int
-	for next := s.insertionOrder.Front(); next.Unwrap() != nil; next = next.Next() {
+	for next := s.order.Front(); next.Unwrap() != nil; next = next.Next() {
 		v, _ := next.Get()
 		f(v, idx)
 		idx++
 	}
 }
 func (s *OrderedSet[T]) Has(v T) (has bool) {
-	_, has = s.insertionOrderMap[v]
+	_, has = s.eleMap[v]
 	return
 }
 func (s *OrderedSet[T]) Values() iterator.Iterator[T] {
@@ -62,6 +62,6 @@ func (s *OrderedSet[T]) Values() iterator.Iterator[T] {
 		sl = append(sl, v)
 	})
 	return iterator.Iterator[T]{
-		DeIterator: iterator.FromSlice(sl),
+		SeIterator: iterator.FromSlice(sl),
 	}
 }

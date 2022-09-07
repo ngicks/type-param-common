@@ -3,68 +3,66 @@ package iterator
 type Chainer[T any] struct {
 	isFormerExhausted bool
 	isLatterExhausted bool
-	former            DeIterator[T]
-	latter            DeIterator[T]
+	former            SeIterator[T]
+	latter            SeIterator[T]
 }
 
-func NewChainer[T any](former DeIterator[T], latter DeIterator[T]) *Chainer[T] {
+func NewChainer[T any](former SeIterator[T], latter SeIterator[T]) *Chainer[T] {
 	return &Chainer[T]{
 		former: former,
 		latter: latter,
 	}
 }
 
-func (iter *Chainer[T]) Len() int {
-	lennerFormer, ok := iter.former.(Lenner)
+func (c *Chainer[T]) SizeHint() int {
+	lennerFormer, ok := c.former.(SizeHinter)
 	if !ok {
 		return -1
 	}
-	lennerLatter, ok := iter.latter.(Lenner)
+	lennerLatter, ok := c.latter.(SizeHinter)
 	if !ok {
 		return -1
 	}
-	formerLen := lennerFormer.Len()
-	latterLen := lennerLatter.Len()
+	formerLen := lennerFormer.SizeHint()
+	latterLen := lennerLatter.SizeHint()
 	if formerLen < 0 || latterLen < 0 {
 		return -1
 	}
 	return formerLen + latterLen
 }
 
-func (z *Chainer[T]) next(
-	nextFnFormer, nextFnLatter nextFunc[T],
-	isFormerExhausted func() bool,
-	setFormerExhausted func(),
-) (next T, ok bool) {
-	var v T
-	if !isFormerExhausted() {
-		v, ok = nextFnFormer()
+func (c *Chainer[T]) Next() (next T, ok bool) {
+	if !c.isFormerExhausted {
+		v, ok := c.former.Next()
 		if ok {
 			return v, ok
 		}
-		setFormerExhausted()
+		// former will not be Next-ed once it returns not-ok.
+		c.isFormerExhausted = true
 	}
 
-	v, ok = nextFnLatter()
-	if ok {
-		return v, true
+	if !c.isLatterExhausted {
+		v, ok := c.latter.Next()
+		if ok {
+			return v, ok
+		}
+		// latter is treated similary.
+		c.isLatterExhausted = true
 	}
-
 	return
 }
-func (z *Chainer[T]) Next() (next T, ok bool) {
-	return z.next(
-		z.former.Next,
-		z.latter.Next,
-		func() bool { return z.isFormerExhausted },
-		func() { z.isFormerExhausted = true },
-	)
-}
-func (z *Chainer[T]) NextBack() (next T, ok bool) {
-	return z.next(
-		z.latter.NextBack,
-		z.former.NextBack,
-		func() bool { return z.isLatterExhausted },
-		func() { z.isLatterExhausted = true },
-	)
+
+// Reverse implements Reverser.
+func (c *Chainer[T]) Reverse() (rev SeIterator[T], ok bool) {
+	revFormer, okFormer := Reverse(c.former)
+	revLatter, okLatter := Reverse(c.latter)
+	if !(okFormer && okLatter) {
+		return nil, false
+	}
+	return &Chainer[T]{
+		former:            revLatter,
+		latter:            revFormer,
+		isFormerExhausted: c.isLatterExhausted,
+		isLatterExhausted: c.isFormerExhausted,
+	}, true
 }
