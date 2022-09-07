@@ -16,12 +16,12 @@ type Enumerator[T any] struct {
 	inner SeIterator[T]
 }
 
-func (e *Enumerator[T]) Next() (next *EnumerateEnt[T], ok bool) {
+func (e *Enumerator[T]) Next() (next EnumerateEnt[T], ok bool) {
 	nextInner, ok := e.inner.Next()
 	if !ok {
-		return &EnumerateEnt[T]{}, false
+		return EnumerateEnt[T]{}, false
 	}
 	c := e.count
 	e.count++
-	return &EnumerateEnt[T]{Count: c, Next: nextInner}, true
+	return EnumerateEnt[T]{Count: c, Next: nextInner}, true
 }

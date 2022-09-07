@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/ngicks/type-param-common/iterator"
+	"golang.org/x/exp/constraints"
 )
 
 func testIterator[T any](t *testing.T, input []T) {
@@ -41,4 +42,39 @@ func testIterator[T any](t *testing.T, input []T) {
 			t.Fatalf("must equal. actual = %+v, expected = %+v", eached, input)
 		}
 	})
+}
+
+func TestIterator(t *testing.T) {
+	input := []int{5, 6, 7, 12, 8, 9, 10}
+
+	t.Run("Find", func(t *testing.T) {
+		iter := iterator.FromSlice(input).ToIterator()
+		v, _ := iter.Find(func(i int) bool { return i > 6 && i%2 == 0 })
+		if v != 12 {
+			t.Fatalf("invalid find: %d", v)
+		}
+	})
+	t.Run("Find no match", func(t *testing.T) {
+		iter := iterator.FromSlice(input).ToIterator()
+		_, found := iter.Find(func(i int) bool { return i > 125 })
+		if found {
+			t.Fatalf("invalid find")
+		}
+	})
+	t.Run("Reduce", func(t *testing.T) {
+		iter := iterator.FromSlice(input).ToIterator()
+		reduced := iter.Reduce(max[int])
+		if reduced != 12 {
+			t.Fatalf("invalid reduce: %d", reduced)
+		}
+	})
+
+}
+
+func max[T constraints.Ordered](i, j T) T {
+	if i > j {
+		return i
+	} else {
+		return j
+	}
 }
