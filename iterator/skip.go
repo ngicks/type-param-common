@@ -13,12 +13,12 @@ func NewNSkipper[T any](iter SeIterator[T], n int) *NSkipper[T] {
 }
 
 func (iter *NSkipper[T]) SizeHint() int {
-	if sizeHinter, ok := iter.inner.(SizeHinter); ok {
-		l := sizeHinter.SizeHint()
+	if hint, ok := iter.inner.(SizeHinter); ok {
+		l := hint.SizeHint()
+		if l < 0 {
+			return l
+		}
 		if l > iter.n {
-			if iter.n <= 0 {
-				return l
-			}
 			return l - iter.n
 		} else {
 			return 0
@@ -66,7 +66,7 @@ func (s *WhileSkipper[T]) next(nextFn nextFunc[T]) (next T, ok bool) {
 	var v T
 
 	if s.isOutOfWhile {
-		return
+		return nextFn()
 	}
 
 	for {
