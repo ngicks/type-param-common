@@ -8,7 +8,7 @@ import (
 	"golang.org/x/exp/constraints"
 )
 
-func testIterator[T any](t *testing.T, input []T) {
+func testIterator[T comparable](t *testing.T, input []T) {
 	t.Run("Next", func(t *testing.T) {
 		iter := iterator.FromSlice(input).ToIterator()
 		nexted := []T{}
@@ -42,6 +42,21 @@ func testIterator[T any](t *testing.T, input []T) {
 			t.Fatalf("must equal. actual = %+v, expected = %+v", eached, input)
 		}
 	})
+
+	t.Run("Map", func(t *testing.T) {
+		iter := iterator.FromSlice(input).ToIterator()
+		iter = iter.Map(func(t T) T {
+			var zero T
+			return zero
+		})
+		collected := iter.Collect()
+		for _, v := range collected {
+			var zero T
+			if v != zero {
+				t.Fatalf("must equal. actual = %+v, expected = %+v", v, zero)
+			}
+		}
+	})
 }
 
 func TestIterator(t *testing.T) {
@@ -68,7 +83,6 @@ func TestIterator(t *testing.T) {
 			t.Fatalf("invalid reduce: %d", reduced)
 		}
 	})
-
 }
 
 func max[T constraints.Ordered](i, j T) T {

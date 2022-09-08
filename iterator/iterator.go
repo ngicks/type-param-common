@@ -61,9 +61,10 @@ func (iter Iterator[T]) TakeWhile(takeIf func(T) bool) Iterator[T] {
 	return Iterator[T]{NewWhileTaker[T](iter, takeIf)}
 }
 func (iter Iterator[T]) Chain(z SeIterator[T]) Iterator[T] {
-	return Iterator[T]{
-		SeIterator: NewChainer(iter.SeIterator, z),
-	}
+	return Iterator[T]{NewChainer(iter.SeIterator, z)}
+}
+func (iter Iterator[T]) Map(mapper func(T) T) Iterator[T] {
+	return Iterator[T]{NewSameTyMapper(iter.SeIterator, mapper)}
 }
 
 func (iter Iterator[T]) Unwrap() SeIterator[T] {

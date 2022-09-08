@@ -13,8 +13,14 @@ func NewNTaker[T any](iter SeIterator[T], n int) *NTaker[T] {
 }
 
 func (t *NTaker[T]) SizeHint() int {
-	if lenner, ok := t.inner.(SizeHinter); ok {
-		return lenner.SizeHint()
+	if hint, ok := t.inner.(SizeHinter); ok {
+		size := hint.SizeHint()
+		if size > t.n {
+			return t.n
+		} else {
+			// maybe -1
+			return size
+		}
 	}
 	return -1
 }
@@ -29,7 +35,7 @@ func (t *NTaker[T]) next(nextFn nextFunc[T]) (next T, ok bool) {
 		t.n--
 		return v, ok
 	}
-	return
+	return v, false
 }
 func (s *NTaker[T]) Next() (next T, ok bool) {
 	return s.next(s.inner.Next)
@@ -49,9 +55,6 @@ func NewWhileTaker[T any](iter SeIterator[T], takeIf func(T) bool) *WhileTaker[T
 }
 
 func (t WhileTaker[T]) SizeHint() int {
-	if lenner, ok := t.inner.(SizeHinter); ok {
-		return lenner.SizeHint()
-	}
 	return -1
 }
 

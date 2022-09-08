@@ -1,7 +1,10 @@
 package iterator
 
-// Range is numeric range iterator.
-// Range is [start, end) if it has end, else, start to max of int.
+// Range is numeric range iterator
+// which iterates over contiguous number in range of [start, end).
+//
+// Each Next call advances iterator 1 ahead to its tail.
+// If you need to skip some number, use with Exclude or Map.
 type Range struct {
 	start int
 	end   int
@@ -11,12 +14,6 @@ func NewRange(start, end int) *Range {
 	return &Range{
 		start: start,
 		end:   end,
-	}
-}
-
-func NewInfiniteRange(start int) *Range {
-	return &Range{
-		start: start,
 	}
 }
 
@@ -42,4 +39,8 @@ func (r *Range) ToIterator() Iterator[int] {
 	return Iterator[int]{
 		SeIterator: r,
 	}
+}
+
+func (r *Range) SizeHint() int {
+	return r.end - r.start
 }

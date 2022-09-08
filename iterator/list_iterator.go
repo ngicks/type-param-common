@@ -1,7 +1,7 @@
 package iterator
 
 import (
-	list "github.com/ngicks/type-param-common/list-param"
+	listparam "github.com/ngicks/type-param-common/list-param"
 )
 
 // Doubly ended iterator made from List.
@@ -10,14 +10,14 @@ type ListIterDe[T any] struct {
 	done         bool
 	advanceFront int
 	advanceBack  int
-	eleFront     list.Element[T]
-	eleBack      list.Element[T]
+	eleFront     listparam.Element[T]
+	eleBack      listparam.Element[T]
 }
 
 // FromFixedList makes *ListIterDe[T] from list.List[T].
 // Range is fixed at the time FromFixedList returns.
 // Mutating passed list outside this iterator may cause undefined behavior.
-func FromFixedList[T any](list list.List[T]) *ListIterDe[T] {
+func FromFixedList[T any](list listparam.List[T]) *ListIterDe[T] {
 	return &ListIterDe[T]{
 		listLen:  list.Len(),
 		eleFront: list.Front(),
@@ -32,8 +32,10 @@ func (li *ListIterDe[T]) Next() (next T, ok bool) {
 	if li.eleFront.Unwrap() == li.eleBack.Unwrap() {
 		li.done = true
 	}
-	next, _ = li.eleFront.Get()
-	ok = true
+	next, ok = li.eleFront.Get()
+	if !ok {
+		return
+	}
 	li.eleFront = li.eleFront.Next()
 	li.advanceFront++
 	return
@@ -59,24 +61,55 @@ func (li *ListIterDe[T]) SizeHint() int {
 	return li.listLen - li.advanceFront - li.advanceBack
 }
 
-// ListIterSe is monotonic list iterator. It only advances to tail.
-// ListIterSe is not fused, its Next might return ok=true after it returns ok=false.
-type ListIterSe[T any] struct {
-	ele list.Element[T]
+func (li *ListIterDe[T]) ToIterator() Iterator[T] {
+	return Iterator[T]{li}
 }
 
-func FromList[T any](list list.List[T]) *ListIterSe[T] {
+// ListIterSe is monotonic list iterator. It only advances to tail.
+// ListIterSe is not fused, its Next might return ok=true after it returns ok=false.
+// This happens when passed list grows its tail afterwards.
+type ListIterSe[T any] struct {
+	root     listparam.List[T]
+	ele      listparam.Element[T]
+	advanced bool
+}
+
+func FromList[T any](list listparam.List[T]) *ListIterSe[T] {
 	return &ListIterSe[T]{
-		ele: list.Front(),
+		root:     list,
+		ele:      list.Front(),
+		advanced: true,
 	}
 }
 
 func (li *ListIterSe[T]) Next() (next T, ok bool) {
-	n := li.ele.Next()
-	if n.Unwrap() == nil {
-		return
+	if li.ele.Unwrap() == nil {
+		if li.root.Front().Unwrap() == nil {
+			return
+		}
+		li.ele = li.root.Front()
 	}
-	li.ele = n
-	next, _ = n.Get()
-	return next, true
+
+	if !li.advanced {
+		nextEle := li.ele.Next()
+		if nextEle.Unwrap() == nil {
+			return next, false
+		} else {
+			li.ele = nextEle
+		}
+	}
+
+	ele, ok := li.ele.Get()
+	nextEle := li.ele.Next()
+	if nextEle.Unwrap() == nil {
+		li.advanced = false
+	} else {
+		li.ele = nextEle
+		li.advanced = true
+	}
+	return ele, ok
+}
+
+func (li *ListIterSe[T]) ToIterator() Iterator[T] {
+	return Iterator[T]{li}
 }

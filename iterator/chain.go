@@ -14,6 +14,7 @@ func NewChainer[T any](former SeIterator[T], latter SeIterator[T]) *Chainer[T] {
 	}
 }
 
+// SizeHint implements SizeHinter.
 func (c *Chainer[T]) SizeHint() int {
 	lennerFormer, ok := c.former.(SizeHinter)
 	if !ok {

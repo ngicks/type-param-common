@@ -13,8 +13,8 @@ func NewNSkipper[T any](iter SeIterator[T], n int) *NSkipper[T] {
 }
 
 func (iter *NSkipper[T]) SizeHint() int {
-	if lenner, ok := iter.inner.(SizeHinter); ok {
-		l := lenner.SizeHint()
+	if sizeHinter, ok := iter.inner.(SizeHinter); ok {
+		l := sizeHinter.SizeHint()
 		if l > iter.n {
 			if iter.n <= 0 {
 				return l
@@ -57,7 +57,8 @@ func NewWhileSkipper[T any](iter SeIterator[T], skipIf func(T) bool) *WhileSkipp
 	}
 }
 
-func (s WhileSkipper[T]) Len() int {
+// SizeHint implements SizeHinter.
+func (s WhileSkipper[T]) SizeHint() int {
 	return -1
 }
 
