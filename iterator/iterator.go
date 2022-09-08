@@ -2,8 +2,8 @@ package iterator
 
 import "fmt"
 
-//go:generate go run ../cmd/sizehinter/sizehinter.go -i . -ignore "sizehinter.go,chain.go,reverser.go,skip.go,take.go"  -o sizehinter.go
-//go:generate go run ../cmd/reverser/reverser.go -i . -ignore "reverse.go,iterator.go,sizehinter.go,chain.go,reverser.go"  -o reverser.go
+//go:generate go run ../cmd/sizehinter/sizehinter.go -i . -ignore "sizehinter.go,chain.go,reverser.go,skip.go,take.go,zip.go"  -o sizehinter.go
+//go:generate go run ../cmd/reverser/reverser.go -i . -ignore "reverse.go,iterator.go,sizehinter.go,chain.go,reverser.go,enumerate.go,zip.go"  -o reverser.go
 
 // nextFunc should be type alias but Go does not provide aliasing for type-param func at the time.
 type nextFunc[T any] func() (next T, ok bool)

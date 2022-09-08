@@ -47,6 +47,21 @@ func (iter Mapper[T,U]) Reverse() (rev SeIterator[U], ok bool) {
 	return iter.ReverseRaw()
 }
 
+func (iter SameTyMapper[T]) ReverseRaw() (rev *SameTyMapper[T], ok bool) {
+	reversedInner, ok := Reverse(iter.inner)
+	if !ok {
+		return nil, ok
+	}
+	return &SameTyMapper[T]{
+		inner: reversedInner,
+		mapper: iter.mapper, 
+	}, true
+}
+
+func (iter SameTyMapper[T]) Reverse() (rev SeIterator[T], ok bool) {
+	return iter.ReverseRaw()
+}
+
 func (iter NSkipper[T]) ReverseRaw() (rev *NSkipper[T], ok bool) {
 	reversedInner, ok := Reverse(iter.inner)
 	if !ok {
