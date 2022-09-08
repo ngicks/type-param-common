@@ -14,7 +14,7 @@ func TestEnumerate(t *testing.T) {
 	}
 
 	for idx, v := range input {
-		next := enum.NextMust()
+		next := enum.MustNext()
 		if next.Count != idx {
 			t.Fatalf("%d, %d\n", idx, next.Count)
 		}

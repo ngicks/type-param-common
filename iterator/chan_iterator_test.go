@@ -22,7 +22,7 @@ func TestChanIterator(t *testing.T) {
 
 	var collected []int
 	for i := 0; i < len(expected); i++ {
-		collected = append(collected, iter.NextMust())
+		collected = append(collected, iter.MustNext())
 	}
 	if !reflect.DeepEqual(expected, collected) {
 		t.Fatalf("must match. expected = %+v, actual = %+v", expected, collected)

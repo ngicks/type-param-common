@@ -69,7 +69,7 @@ func (iter Iterator[T]) Chain(z SeIterator[T]) Iterator[T] {
 func (iter Iterator[T]) Unwrap() SeIterator[T] {
 	return iter.SeIterator
 }
-func (iter Iterator[T]) NextMust() T {
+func (iter Iterator[T]) MustNext() T {
 	v, ok := iter.SeIterator.Next()
 	if !ok {
 		panic("NextMust: failed")

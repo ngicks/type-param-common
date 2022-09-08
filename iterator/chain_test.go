@@ -56,19 +56,19 @@ func TestChainReversed(t *testing.T) {
 
 	answer := []int{}
 
-	answer = append(answer, chained.NextMust())
-	answer = append(answer, chained.NextMust())
+	answer = append(answer, chained.MustNext())
+	answer = append(answer, chained.MustNext())
 	chained = chained.MustReverse()
-	answer = append(answer, chained.NextMust())
-	answer = append(answer, chained.NextMust())
+	answer = append(answer, chained.MustNext())
+	answer = append(answer, chained.MustNext())
 	chained = chained.MustReverse()
-	answer = append(answer, chained.NextMust())
-	answer = append(answer, chained.NextMust())
-	answer = append(answer, chained.NextMust())
+	answer = append(answer, chained.MustNext())
+	answer = append(answer, chained.MustNext())
+	answer = append(answer, chained.MustNext())
 	chained = chained.MustReverse()
-	answer = append(answer, chained.NextMust())
-	answer = append(answer, chained.NextMust())
-	answer = append(answer, chained.NextMust())
+	answer = append(answer, chained.MustNext())
+	answer = append(answer, chained.MustNext())
+	answer = append(answer, chained.MustNext())
 
 	if _, ok := chained.Next(); ok {
 		t.Fatal("must be drained")
