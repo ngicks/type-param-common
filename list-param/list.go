@@ -21,7 +21,7 @@ func (e Element[T]) Unwrap() *list.Element {
 // Get returns internal Value. If internal Value is non-nil and then returns value and true.
 // Otherwise returns zero of T and false.
 func (e Element[T]) Get() (v T, ok bool) {
-	if e.inner.Value == nil {
+	if e.inner == nil || e.inner.Value == nil {
 		return
 	} else {
 		return e.inner.Value.(T), true
@@ -38,6 +38,11 @@ func (e Element[T]) Clear() {
 	e.inner.Value = nil
 }
 func (e Element[T]) Next() Element[T] {
+	if e.inner == nil {
+		return Element[T]{
+			inner: nil,
+		}
+	}
 	return Element[T]{
 		inner: e.inner.Next(),
 	}
