@@ -7,14 +7,14 @@ import (
 
 // OrderedSet is same as Set but remembers insertion order.
 type OrderedSet[T comparable] struct {
-	order  listparam.List[T]
-	eleMap map[T]listparam.Element[T]
+	order  *listparam.List[T]
+	eleMap map[T]*listparam.Element[T]
 }
 
 func NewOrdered[T comparable]() *OrderedSet[T] {
 	return &OrderedSet[T]{
 		order:  listparam.New[T](),
-		eleMap: make(map[T]listparam.Element[T]),
+		eleMap: make(map[T]*listparam.Element[T]),
 	}
 }
 
@@ -31,7 +31,7 @@ func (s *OrderedSet[T]) Add(v T) {
 }
 func (s *OrderedSet[T]) Clear() {
 	s.order = s.order.Init()
-	s.eleMap = make(map[T]listparam.Element[T])
+	s.eleMap = make(map[T]*listparam.Element[T])
 }
 func (s *OrderedSet[T]) Delete(v T) (deleted bool) {
 	ele, deleted := s.eleMap[v]

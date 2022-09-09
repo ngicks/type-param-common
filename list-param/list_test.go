@@ -4,9 +4,12 @@
 
 package listparam
 
-import "testing"
+import (
+	"container/list"
+	"testing"
+)
 
-func checkListLen[T any](t *testing.T, l List[T], len int) bool {
+func checkListLen[T any](t *testing.T, l *List[T], len int) bool {
 	if n := l.Len(); n != len {
 		t.Errorf("l.Len() = %d, want %d", n, len)
 		return false
@@ -57,7 +60,7 @@ func TestList(t *testing.T) {
 
 	// Check standard iteration.
 	sum := 0
-	for e := l.Front(); e.Unwrap() != nil; e = e.Next() {
+	for e := l.Front(); e != nil; e = e.Next() {
 		got, _ := e.Get()
 		if i, ok := got.(int); ok {
 			sum += i
@@ -68,20 +71,20 @@ func TestList(t *testing.T) {
 	}
 
 	// Clear all elements by iterating
-	var next Element[any]
-	for e := l.Front(); e.Unwrap() != nil; e = next {
+	var next *Element[any]
+	for e := l.Front(); e != nil; e = next {
 		next = e.Next()
 		l.Remove(e)
 	}
 }
 
-func checkList(t *testing.T, l List[int], es []int) {
+func checkList(t *testing.T, l *List[int], es []int) {
 	if !checkListLen(t, l, len(es)) {
 		return
 	}
 
 	i := 0
-	for e := l.Front(); e.Unwrap() != nil; e = e.Next() {
+	for e := l.Front(); e != nil; e = e.Next() {
 		le, _ := e.Get()
 		if le != es[i] {
 			t.Errorf("elt[%d].Value = %v, want %v", i, le, es[i])
@@ -166,10 +169,10 @@ func TestIssue6349(t *testing.T) {
 	if got, _ := e.Get(); got != 1 {
 		t.Errorf("e.value = %d, want 1", got)
 	}
-	if e.Next().Unwrap() != nil {
+	if e.Next() != nil {
 		t.Errorf("e.Next() != nil")
 	}
-	if e.Prev().Unwrap() != nil {
+	if e.Prev() != nil {
 		t.Errorf("e.Prev() != nil")
 	}
 }
@@ -199,7 +202,7 @@ func TestInsertBeforeUnknownMark(t *testing.T) {
 	l.PushBack(1)
 	l.PushBack(2)
 	l.PushBack(3)
-	l.InsertBefore(1, NewElement[int]())
+	l.InsertBefore(1, &Element[int]{inner: new(list.Element), entMap: make(entMap[int])})
 	checkList(t, l, []int{1, 2, 3})
 }
 
@@ -209,7 +212,7 @@ func TestInsertAfterUnknownMark(t *testing.T) {
 	l.PushBack(1)
 	l.PushBack(2)
 	l.PushBack(3)
-	l.InsertAfter(1, NewElement[int]())
+	l.InsertAfter(1, &Element[int]{inner: new(list.Element), entMap: make(entMap[int])})
 	checkList(t, l, []int{1, 2, 3})
 }
 
