@@ -46,7 +46,7 @@ func (s *OrderedSet[T]) Delete(v T) (deleted bool) {
 // Order is FIFO. Call of Add with existing v does not change order.
 func (s *OrderedSet[T]) ForEach(f func(v T, idx int)) {
 	var idx int
-	for next := s.order.Front(); next.Unwrap() != nil; next = next.Next() {
+	for next := s.order.Front(); next != nil; next = next.Next() {
 		v, _ := next.Get()
 		f(v, idx)
 		idx++
