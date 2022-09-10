@@ -8,8 +8,11 @@ import (
 )
 
 func TestQueue(t *testing.T) {
-	queue := slice.Queue[int]{}
+	testQueue(t, slice.Queue[int]{})
+	testQueue(t, nil)
+}
 
+func testQueue(t *testing.T, queue slice.Queue[int]) {
 	if queue.Len() != 0 {
 		t.Fatalf("wrong len: expected to be %d but is %d", 0, queue.Len())
 	}

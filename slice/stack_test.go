@@ -8,8 +8,11 @@ import (
 )
 
 func TestStack(t *testing.T) {
-	stack := slice.Stack[int]{}
+	testStack(t, slice.Stack[int]{})
+	testStack(t, nil)
+}
 
+func testStack(t *testing.T, stack slice.Stack[int]) {
 	if stack.Len() != 0 {
 		t.Fatalf("wrong len: expected to be %d but is %d", 0, stack.Len())
 	}

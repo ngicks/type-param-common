@@ -8,8 +8,11 @@ import (
 )
 
 func TestDequeue(t *testing.T) {
-	deque := slice.Deque[int]{}
+	testDequeue(t, slice.Deque[int]{})
+	testDequeue(t, nil)
+}
 
+func testDequeue(t *testing.T, deque slice.Deque[int]) {
 	if deque.Len() != 0 {
 		t.Fatalf("wrong len: expected to be %d but is %d", 0, deque.Len())
 	}
