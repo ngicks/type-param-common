@@ -13,8 +13,8 @@ func TestChain(t *testing.T) {
 
 	{
 		expected := []int{1, 2, 3, 4, 5, 10, 11, 12, 13, 14}
-		f := iterator.FromSlice(expectedFormer).ToIterator()
-		l := iterator.FromSlice(expectedLatter).ToIterator()
+		f := iterator.FromSlice(expectedFormer)
+		l := iterator.FromSlice(expectedLatter)
 		chained := f.Chain(l)
 
 		if _, ok := chained.SeIterator.(*iterator.Chainer[int]); !ok {
@@ -28,8 +28,8 @@ func TestChain(t *testing.T) {
 	}
 	{
 		expected := []int{10, 11, 12, 13, 14, 1, 2, 3, 4, 5}
-		f := iterator.FromSlice(expectedFormer).ToIterator()
-		l := iterator.FromSlice(expectedLatter).ToIterator()
+		f := iterator.FromSlice(expectedFormer)
+		l := iterator.FromSlice(expectedLatter)
 		chained := l.Chain(f)
 
 		if _, ok := chained.SeIterator.(*iterator.Chainer[int]); !ok {
@@ -50,8 +50,8 @@ func TestChainReversed(t *testing.T) {
 	expectedLatter := []int{10, 11, 12, 13, 14}
 	expected := []int{1, 2, 14, 13, 3, 4, 5, 12, 11, 10}
 
-	f := iterator.FromSlice(expectedFormer).ToIterator()
-	l := iterator.FromSlice(expectedLatter).ToIterator()
+	f := iterator.FromSlice(expectedFormer)
+	l := iterator.FromSlice(expectedLatter)
 	chained := f.Chain(l)
 
 	answer := []int{}

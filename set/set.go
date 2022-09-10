@@ -46,7 +46,5 @@ func (s *Set[T]) Values() iterator.Iterator[T] {
 	s.ForEach(func(v T, _ int) {
 		sl = append(sl, v)
 	})
-	return iterator.Iterator[T]{
-		SeIterator: iterator.FromSlice(sl),
-	}
+	return iterator.FromSlice(sl)
 }

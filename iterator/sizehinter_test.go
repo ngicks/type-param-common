@@ -6,7 +6,7 @@ import (
 
 func TestSizeHinter(t *testing.T) {
 	innerSl := []int{1, 2, 3, 4, 5}
-	sliceIter := FromSlice(innerSl)
+	sliceIter := NewSliceIterDe(innerSl)
 	iter := Iterator[int]{SeIterator: sliceIter}
 
 	assertEq := func(leng int) {

@@ -10,7 +10,7 @@ import (
 func TestListIteratorDe(t *testing.T) {
 	t.Run("len = 0", func(t *testing.T) {
 		list := listparam.New[int]()
-		iter := iterator.FromFixedList(list)
+		iter := iterator.NewListIterDe(list)
 
 		if iter.SizeHint() != 0 {
 			t.Fatalf("mismatched = %d", iter.SizeHint())
@@ -40,7 +40,7 @@ func TestListIteratorDe(t *testing.T) {
 			list.PushBack(i)
 		}
 
-		iter := iterator.FromFixedList(list)
+		iter := iterator.NewListIterDe(list)
 
 		if iter.SizeHint() != 5 {
 			t.Fatalf("mismatched. size = %d", iter.SizeHint())
@@ -103,7 +103,7 @@ func TestListIteratorDe(t *testing.T) {
 func TestListIteratorSe(t *testing.T) {
 	t.Run("len = 0", func(t *testing.T) {
 		list := listparam.New[int]()
-		iter := iterator.FromList(list)
+		iter := iterator.NewListIterSe(list)
 
 		for i := 0; i < 100; i++ {
 			if _, ok := iter.Next(); ok {
@@ -139,7 +139,7 @@ func TestListIteratorSe(t *testing.T) {
 			list.PushBack(i)
 		}
 
-		iter := iterator.FromList(list)
+		iter := iterator.NewListIterSe(list)
 
 		for i := 0; i < 25; i = i + 5 {
 			next, ok := iter.Next()

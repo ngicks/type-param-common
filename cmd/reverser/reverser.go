@@ -69,7 +69,6 @@ func typeInfoToTemplateParam(typInfo []methodgenhelper.TypeInfo) []TemplateParam
 	for _, v := range typInfo {
 		otherMember := iterator.
 			FromSlice(methodgenhelper.GetMemberNames(v.StructTyp)).
-			ToIterator().
 			Exclude(func(s string) bool { return s == v.InnerMemberName }).
 			Collect()
 

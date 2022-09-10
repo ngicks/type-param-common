@@ -40,13 +40,13 @@ func TestSkipNSizeHint(t *testing.T) {
 	}
 
 	for _, testCase := range testCases {
-		iter := iterator.FromSlice(testCase.input).ToIterator().SkipN(testCase.skipN)
+		iter := iterator.FromSlice(testCase.input).SkipN(testCase.skipN)
 		if size := iter.SizeHint(); size != testCase.expectedSize {
 			t.Fatalf("mismatched: expected = %d, actual = %d", testCase.expectedSize, size)
 		}
 	}
 
-	iter := iterator.FromList(listparam.New[int]()).ToIterator().SkipN(5)
+	iter := iterator.FromList(listparam.New[int]()).SkipN(5)
 	if size := iter.SizeHint(); size != -1 {
 		t.Fatalf("mismatched: expected = %d, actual = %d", -1, size)
 	}
@@ -77,7 +77,7 @@ func TestSkipN(t *testing.T) {
 	}
 
 	for _, testCase := range testCases {
-		iter := iterator.FromSlice(testCase.input).ToIterator().SkipN(testCase.skipN)
+		iter := iterator.FromSlice(testCase.input).SkipN(testCase.skipN)
 		if collected := iter.Collect(); !reflect.DeepEqual(testCase.expected, collected) {
 			t.Errorf("mismatched: expected = %+v, actual = %+v", testCase.expected, collected)
 		}
@@ -86,9 +86,9 @@ func TestSkipN(t *testing.T) {
 
 func TestSkipWhileSizeHint(t *testing.T) {
 	for _, iter := range []iterator.Iterator[int]{
-		iterator.FromList(listparam.New[int]()).ToIterator(),
-		iterator.FromSlice([]int{1, 2, 3}).ToIterator(),
-		iterator.NewRange(0, 25).ToIterator(),
+		iterator.FromList(listparam.New[int]()),
+		iterator.FromSlice([]int{1, 2, 3}),
+		iterator.FromRange(0, 25),
 	} {
 		size := iter.SkipWhile(func(i int) bool { return true }).SizeHint()
 		if size != -1 {
@@ -129,13 +129,13 @@ func TestSkipWhile(t *testing.T) {
 
 	for _, testCase := range testCases {
 		{
-			iter := iterator.FromSlice(testCase.input).ToIterator().SkipWhile(func(i int) bool { return false })
+			iter := iterator.FromSlice(testCase.input).SkipWhile(func(i int) bool { return false })
 			if collected := iter.Collect(); !reflect.DeepEqual(testCase.input, collected) {
 				t.Errorf("mismatched: expected = %+v, actual = %+v", testCase.input, collected)
 			}
 		}
 		{
-			iter := iterator.FromSlice(testCase.input).ToIterator().SkipWhile(testCase.skipIf)
+			iter := iterator.FromSlice(testCase.input).SkipWhile(testCase.skipIf)
 			if collected := iter.Collect(); !reflect.DeepEqual(testCase.expected, collected) {
 				t.Errorf("mismatched: expected = %+v, actual = %+v", testCase.expected, collected)
 			}

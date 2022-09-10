@@ -8,8 +8,8 @@ type SliceIterDe[T any] struct {
 	idxBack    int
 }
 
-// FromSlice makes SliceIterDe[T] from []T.
-func FromSlice[T any](sl []T) *SliceIterDe[T] {
+// NewSliceIterDe makes SliceIterDe[T] from []T.
+func NewSliceIterDe[T any](sl []T) *SliceIterDe[T] {
 	return &SliceIterDe[T]{
 		innerSlice: sl,
 		idxFront:   0,
@@ -37,10 +37,4 @@ func (si *SliceIterDe[T]) NextBack() (next T, ok bool) {
 // SizeHint returns size of remaining elements.
 func (si *SliceIterDe[T]) SizeHint() int {
 	return si.idxBack - si.idxFront + 1
-}
-
-func (si *SliceIterDe[T]) ToIterator() Iterator[T] {
-	return Iterator[T]{
-		SeIterator: si,
-	}
 }

@@ -18,7 +18,7 @@ func TestChanIterator(t *testing.T) {
 			intChan <- v
 		}
 	}()
-	iter := iterator.FromChannel(intChan).ToIterator()
+	iter := iterator.FromChannel(intChan)
 
 	var collected []int
 	for i := 0; i < len(expected); i++ {

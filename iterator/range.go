@@ -35,12 +35,6 @@ func (r *Range) NextBack() (next int, ok bool) {
 	return next, true
 }
 
-func (r *Range) ToIterator() Iterator[int] {
-	return Iterator[int]{
-		SeIterator: r,
-	}
-}
-
 func (r *Range) SizeHint() int {
 	return r.end - r.start
 }

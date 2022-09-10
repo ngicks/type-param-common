@@ -42,7 +42,7 @@ func TestRange(t *testing.T) {
 		t.Run(
 			fmt.Sprintf("start = %d, end = %d", testCase.start, testCase.end),
 			func(t *testing.T) {
-				r := iterator.NewRange(testCase.start, testCase.end).ToIterator()
+				r := iterator.FromRange(testCase.start, testCase.end)
 				collected := r.Collect()
 				if !reflect.DeepEqual(testCase.expected, collected) {
 					t.Fatalf("must be equal. expected = %+v, actual = %+v", testCase.expected, collected)
@@ -57,7 +57,7 @@ func TestRange(t *testing.T) {
 		t.Run(
 			fmt.Sprintf("start = %d, end = %d", testCase.start, testCase.end),
 			func(t *testing.T) {
-				r := iterator.NewRange(testCase.start, testCase.end).ToIterator().MustReverse()
+				r := iterator.FromRange(testCase.start, testCase.end).MustReverse()
 				collected := r.Collect()
 				if !reflect.DeepEqual([]int(expected), collected) {
 					t.Fatalf("must be equal. expected = %+v, actual = %+v", expected, collected)

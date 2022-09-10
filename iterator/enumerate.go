@@ -1,19 +1,25 @@
 package iterator
 
+func Enumerate[T any](iter SeIterator[T]) Iterator[EnumerateEnt[T]] {
+	return Iterator[EnumerateEnt[T]]{
+		SeIterator: NewEnumerator(iter),
+	}
+}
+
 type EnumerateEnt[T any] struct {
 	Count int
 	Next  T
 }
 
-func Enumerate[T any](iter SeIterator[T]) *Enumerator[T] {
-	return &Enumerator[T]{
-		inner: iter,
-	}
-}
-
 type Enumerator[T any] struct {
 	count int
 	inner SeIterator[T]
+}
+
+func NewEnumerator[T any](iter SeIterator[T]) *Enumerator[T] {
+	return &Enumerator[T]{
+		inner: iter,
+	}
 }
 
 func (e *Enumerator[T]) Next() (next EnumerateEnt[T], ok bool) {

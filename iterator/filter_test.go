@@ -19,7 +19,7 @@ func executeCases[T any](
 	testCases []SelectorTestCase[T],
 ) {
 	for _, testCase := range testCases {
-		iter := iterator.FromSlice(testCase.input).ToIterator()
+		iter := iterator.FromSlice(testCase.input)
 		iter = method(iter, testCase.filter)
 		actual := iter.Collect()
 		if !reflect.DeepEqual(testCase.expected, actual) {

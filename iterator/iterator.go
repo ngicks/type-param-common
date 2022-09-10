@@ -1,6 +1,10 @@
 package iterator
 
-import "fmt"
+import (
+	"fmt"
+
+	listparam "github.com/ngicks/type-param-common/list-param"
+)
 
 //go:generate go run ../cmd/sizehinter/sizehinter.go -i . -ignore "sizehinter.go,chain.go,reverser.go,skip.go,take.go,zip.go"  -o sizehinter.go
 //go:generate go run ../cmd/reverser/reverser.go -i . -ignore "reverse.go,iterator.go,sizehinter.go,chain.go,reverser.go,enumerate.go,zip.go"  -o reverser.go
@@ -40,6 +44,36 @@ type DeIterator[T any] interface {
 
 type Iterator[T any] struct {
 	SeIterator[T]
+}
+
+func FromSlice[T any](sl []T) Iterator[T] {
+	return Iterator[T]{
+		SeIterator: NewSliceIterDe(sl),
+	}
+}
+
+func FromFixedList[T any](list *listparam.List[T]) Iterator[T] {
+	return Iterator[T]{
+		SeIterator: NewListIterDe(list),
+	}
+}
+
+func FromList[T any](list *listparam.List[T]) Iterator[T] {
+	return Iterator[T]{
+		SeIterator: NewListIterSe(list),
+	}
+}
+
+func FromChannel[T any](channel <-chan T) Iterator[T] {
+	return Iterator[T]{
+		SeIterator: NewChanIter(channel),
+	}
+}
+
+func FromRange(start, end int) Iterator[int] {
+	return Iterator[int]{
+		SeIterator: NewRange(start, end),
+	}
 }
 
 func (iter Iterator[T]) Select(selector func(T) bool) Iterator[T] {

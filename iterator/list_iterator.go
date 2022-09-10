@@ -14,10 +14,10 @@ type ListIterDe[T any] struct {
 	eleBack      *listparam.Element[T]
 }
 
-// FromFixedList makes *ListIterDe[T] from list.List[T].
-// Range is fixed at the time FromFixedList returns.
+// NewListIterDe makes *ListIterDe[T] from list.List[T].
+// Range is fixed at the time NewListIterDe returns.
 // Mutating passed list outside this iterator may cause undefined behavior.
-func FromFixedList[T any](list *listparam.List[T]) *ListIterDe[T] {
+func NewListIterDe[T any](list *listparam.List[T]) *ListIterDe[T] {
 	return &ListIterDe[T]{
 		listLen:  list.Len(),
 		eleFront: list.Front(),
@@ -67,10 +67,6 @@ func (li *ListIterDe[T]) SizeHint() int {
 	return li.listLen - li.advanceFront - li.advanceBack
 }
 
-func (li *ListIterDe[T]) ToIterator() Iterator[T] {
-	return Iterator[T]{li}
-}
-
 // ListIterSe is monotonic list iterator. It only advances to tail.
 // ListIterSe is not fused, its Next might return ok=true after it returns ok=false.
 // This happens when passed list grows its tail afterwards.
@@ -80,7 +76,7 @@ type ListIterSe[T any] struct {
 	advanced bool
 }
 
-func FromList[T any](list *listparam.List[T]) *ListIterSe[T] {
+func NewListIterSe[T any](list *listparam.List[T]) *ListIterSe[T] {
 	return &ListIterSe[T]{
 		root:     list,
 		ele:      list.Front(),
@@ -114,8 +110,4 @@ func (li *ListIterSe[T]) Next() (next T, ok bool) {
 		li.advanced = true
 	}
 	return ele, ok
-}
-
-func (li *ListIterSe[T]) ToIterator() Iterator[T] {
-	return Iterator[T]{li}
 }

@@ -8,7 +8,7 @@ import (
 
 func TestSliceIterator(t *testing.T) {
 	t.Run("input is nil", func(t *testing.T) {
-		iter := iterator.FromSlice[int](nil)
+		iter := iterator.NewSliceIterDe[int](nil)
 
 		if iter.SizeHint() != 0 {
 			t.Fatal("mismatched")
@@ -27,7 +27,7 @@ func TestSliceIterator(t *testing.T) {
 		}
 	})
 	t.Run("len = 0", func(t *testing.T) {
-		iter := iterator.FromSlice([]int{})
+		iter := iterator.NewSliceIterDe([]int{})
 
 		if iter.SizeHint() != 0 {
 			t.Fatal("mismatched")
@@ -51,7 +51,7 @@ func TestSliceIterator(t *testing.T) {
 			sl = append(sl, i)
 		}
 
-		iter := iterator.FromSlice(sl)
+		iter := iterator.NewSliceIterDe(sl)
 
 		if iter.SizeHint() != 5 {
 			t.Fatalf("mismatched. size = %d", iter.SizeHint())

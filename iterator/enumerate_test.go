@@ -8,10 +8,8 @@ import (
 
 func TestEnumerate(t *testing.T) {
 	input := []string{"foo", "bar", "baz", "qux", "quux"}
-	iter := iterator.FromSlice(input).ToIterator()
-	enum := iterator.Iterator[iterator.EnumerateEnt[string]]{
-		SeIterator: iterator.Enumerate[string](iter),
-	}
+	iter := iterator.FromSlice(input)
+	enum := iterator.Enumerate[string](iter)
 
 	for idx, v := range input {
 		next := enum.MustNext()

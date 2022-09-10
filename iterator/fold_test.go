@@ -9,7 +9,7 @@ import (
 
 func TestFold(t *testing.T) {
 	input := []int{1, 2, 3, 4, 5}
-	iter := iterator.FromSlice(input).ToIterator()
+	iter := iterator.FromSlice(input)
 
 	mm := iterator.Fold[int](iter, func(mm map[int]string, next int) map[int]string {
 		mm[next] = fmt.Sprintf("foo%d", next)

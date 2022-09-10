@@ -10,11 +10,11 @@ import (
 func TestZip(t *testing.T) {
 	t.Run("different type", func(t *testing.T) {
 		zip := iterator.Zip[int, string](
-			iterator.NewRange(0, 6).ToIterator(),
-			iterator.Map[int](
+			iterator.FromRange(0, 6),
+			iterator.NewMapper[int](
 				iterator.NewRange(0, 3),
 				func(i int) string { return strconv.Itoa(i) },
-			).ToIterator(),
+			),
 		)
 
 		for i := 0; i < 3; i++ {
@@ -30,7 +30,7 @@ func TestZip(t *testing.T) {
 			}
 		}
 
-		iterator.NewRange(0, 100).ToIterator().ForEach(func(int) {
+		iterator.FromRange(0, 100).ForEach(func(int) {
 			_, ok := zip.Next()
 			if ok {
 				t.Fatal("must be ok = false")
@@ -44,8 +44,8 @@ func TestZip(t *testing.T) {
 			right int
 		}{{2, 3}, {3, 6}, {8, 13}, {26, 33}, {2789, 23}} {
 			zip := iterator.Zip[int, int](
-				iterator.NewRange(0, testCase.left).ToIterator(),
-				iterator.NewRange(0, testCase.right).ToIterator(),
+				iterator.FromRange(0, testCase.left),
+				iterator.FromRange(0, testCase.right),
 			)
 
 			less := func() int {
@@ -70,7 +70,7 @@ func TestZip(t *testing.T) {
 				}
 			}
 
-			iterator.NewRange(0, 100).ToIterator().ForEach(func(int) {
+			iterator.FromRange(0, 100).ForEach(func(int) {
 				_, ok := zip.Next()
 				if ok {
 					t.Fatal("must be ok = false")
@@ -85,8 +85,8 @@ func TestZip(t *testing.T) {
 			right int
 		}{{2, 3}, {3, 6}, {8, 13}, {26, 33}, {2789, 23}} {
 			zip := iterator.Zip[int, int](
-				iterator.NewRange(0, testCase.left).ToIterator(),
-				iterator.NewRange(0, testCase.right).ToIterator(),
+				iterator.FromRange(0, testCase.left),
+				iterator.FromRange(0, testCase.right),
 			)
 
 			if _, ok := zip.Reverse(); ok {
@@ -99,8 +99,8 @@ func TestZip(t *testing.T) {
 			right int
 		}{{2, 2}, {3, 3}, {15, 15}, {2789, 2789}} {
 			zip := iterator.Zip[int, int](
-				iterator.NewRange(0, testCase.left).ToIterator(),
-				iterator.NewRange(0, testCase.right).ToIterator().Map(func(i int) int { return i * 2 }),
+				iterator.FromRange(0, testCase.left),
+				iterator.FromRange(0, testCase.right).Map(func(i int) int { return i * 2 }),
 			)
 
 			rev, ok := iterator.Iterator[iterator.TwoEleTuple[int, int]]{zip}.Reverse()
@@ -123,7 +123,7 @@ func TestZip(t *testing.T) {
 				}
 			}
 
-			iterator.NewRange(0, 100).ToIterator().ForEach(func(int) {
+			iterator.FromRange(0, 100).ForEach(func(int) {
 				_, ok := zip.Next()
 				if ok {
 					t.Fatal("must be ok = false")
