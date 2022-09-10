@@ -6,23 +6,18 @@ import (
 
 type entMap[T any] map[*list.Element]*Element[T]
 
-// ensureGet gets mm[l] and ensures it to have been existing before.
+// getOrCreate gets e[l] or creates *Element[T].
 //
 //   - returns nil if l is nil.
-//   - creates new *Element[T] if mm does not have l.
-//     this happens if after calling PushBackList/ PushFrontList.
-func (e entMap[T]) ensureGet(l *list.Element) *Element[T] {
+//   - creates new *Element[T] if e does not have l.
+//     this happens only after calling PushBackList / PushFrontList.
+func (e entMap[T]) getOrCreate(l *list.Element) *Element[T] {
 	if l == nil {
 		return nil
 	}
 	ele, ok := e[l]
 	if !ok {
-		ent := &Element[T]{
-			inner:  l,
-			entMap: e,
-		}
-		e[l] = ent
-		return ent
+		return e.createInsertingElement(l)
 	}
 	return ele
 }

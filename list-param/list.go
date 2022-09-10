@@ -46,11 +46,11 @@ func (e *Element[T]) Set(v T) {
 
 func (e *Element[T]) Next() *Element[T] {
 	e.ensureValid()
-	return e.entMap.ensureGet(e.inner.Next())
+	return e.entMap.getOrCreate(e.inner.Next())
 }
 func (e *Element[T]) Prev() *Element[T] {
 	e.ensureValid()
-	return e.entMap.ensureGet(e.inner.Prev())
+	return e.entMap.getOrCreate(e.inner.Prev())
 }
 
 type List[T any] struct {
@@ -76,11 +76,11 @@ func (l *List[T]) lazyInit() {
 
 func (l *List[T]) Back() *Element[T] {
 	l.lazyInit()
-	return l.entMap.ensureGet(l.inner.Back())
+	return l.entMap.getOrCreate(l.inner.Back())
 }
 func (l *List[T]) Front() *Element[T] {
 	l.lazyInit()
-	return l.entMap.ensureGet(l.inner.Front())
+	return l.entMap.getOrCreate(l.inner.Front())
 }
 func (l *List[T]) Init() *List[T] {
 	l.lazyInit()
