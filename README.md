@@ -2,42 +2,138 @@
 
 Type parameter primitives and commons.
 
-Basically wrapper around go std library. If wrapping is inadequate, copy-and-paste and modify go codes.
+This repository contains type-parameter version of containers
+and set, iterator, queue, deque, stack implementations.
 
-## Non overlapping package name
+## Suffixed with `-param` to avoid name overlapping
 
 Wrappers of Go std lib are suffixed with `-param`
 
 ## Package descriptions
 
-### heap-param, list-param, ring-param
+### Wrappers of `container` of standard
 
-Wrappers around `container/heap`, `container/list` and `container/ring`. Getter/Setter and Unwrap methods are added to mutate/observe Value from outside wrapper.
+- heap-param
+  - STATUS: done. doc comments needs improvement.
+- list-param
+  - STATUS: done. most of behavior consistent to `container/list`.
+- ring-param
+  - STATUS: not yet done. Usable but behavior is not consistent with `container/ring`. you can not compare ringA == ringB to check identity.
 
-Correct usage of these types involves direct mutation by assigning to Value. Since Go expose no way to trap property accesses, without additional getters/setters we have no way to access to those properties. Thus these methods should be justified.
+Heap-param wraps `container/heap` of standard library.
+see `./heap.go`, `./filterable_heap.go` and corresponding test files for example usages.
+
+list-param and ring-param wraps `container/list` and `container/ring` respectively.
+
+*Element[T] and *Ring[T] have addtitional methods, `Get`, `Set` and `Unwrap` to replace direct mutation/observation of `elementOrRing.Value`. Some of their methods are changed their returned value from single `ret T` to `(ret T, ok bool)`. This second boolean value indicates internal Value was not nil, which means returned `ret T` is zero value if false.
 
 ### sync-param
 
-Type-param aware wrappers around sync.Map and sync.Pool.
+Wrappers of `sync.Map` and `sync.Pool`.
 
 ### slice
 
-Deque, queue, stack and whatever that needs type-param. It eases pain of `write-deque-type-everywhere`.
+Deque[T], Queue[T], Stack[T] and helper functions. It eases pain of `write-deque-everywhere`.
 
-- [x] Deque
-- [x] Queue
-- [x] Stack
+- Deque
+- Queue
+- Stack
+- Helper functions
+  - Useful for unsorted slice.
 
 ### iterator
 
-Iterator impl for go.
+Exerimental iterator impl for go.
 
-- [x] creating iterator
-  - [x] from slice
-  - [x] from list.List[T]
-  - [x] from channel
-- [x] Reverse, ForEach
-- [x] Filter(Select and Exclude)
-- [x] Map
-- [x] Reduce
-- [x] Skip and Take
+- STATUS: half done. requires addition of missing tests. add benchmark for performance comparision.
+
+`iterator` package's main struct is `Iterator[T]`.
+
+```go
+type Iterator[T any] struct {
+	SeIterator[T]
+}
+
+type Nexter[T any] interface {
+	Next() (next T, ok bool)
+}
+
+// Singly ended iterator.
+type SeIterator[T any] interface {
+	Nexter[T]
+}
+```
+
+Usage example:
+
+```go
+package main
+
+import (
+	"fmt"
+	"strings"
+
+	"github.com/ngicks/type-param-common/iterator"
+)
+
+func main() {
+	fmt.Println(
+		iterator.Fold[iterator.EnumerateEnt[string]](
+			iterator.Enumerate[string](
+				iterator.
+					FromSlice([]string{"foo", "bar", "baz"}).
+					Map(func(s string) string { return s + s }).
+					Exclude(func(s string) bool { return strings.Contains(s, "az") }).
+					MustReverse(),
+			),
+			func(accumulator map[string]int, next iterator.EnumerateEnt[string]) map[string]int {
+				accumulator[next.Next] = next.Count
+				return accumulator
+			},
+			map[string]int{},
+		),
+	)  // outputs: map[barbar:0 foofoo:1]
+}
+```
+
+It requires Singly ended iterator as embeded field. Iterator[T] is thin helper type. Chance to have breaking change (e.g. new field) is low.
+
+Iterator[T] can be created directly from
+- slice []T
+- listparam.List[T]
+- channel <-chan T
+
+```go
+var iter iterator.Iterator[string] 
+iter = iterator.FromSlice(strSlice)
+// or
+// for size-fixed iterator
+iter = iterator.FromFixedList(list)
+// for growing iterator
+iter = iterator.FromList(list)
+// or
+iter = iterator.FromChannel(make(chan string))
+```
+
+Input SeIterator[T] can optionally implements interfaces shown below. Those will be used in iterator methods of corresponding name.
+
+```go
+type SizeHinter interface {
+	SizeHint() int
+}
+
+type Reverser[T any] interface {
+	Reverse() (rev SeIterator[T], ok bool)
+}
+
+type Unwrapper[T any] interface {
+	Unwrap() SeIterator[T]
+}
+
+
+// Doubly ended iterator.
+type DeIterator[T any] interface {
+	Nexter[T]
+	NextBacker[T]
+}
+```
