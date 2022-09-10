@@ -22,7 +22,7 @@ func FindLast[T any](sl []T, predicate func(v T) bool) (v T, found bool) {
 	return sl[p], true
 }
 func Position[T any](sl []T, predicate func(v T) bool) int {
-	if sl == nil || len(sl) == 0 || predicate == nil {
+	if len(sl) == 0 || predicate == nil {
 		return -1
 	}
 	for idx, v := range sl {
@@ -33,7 +33,7 @@ func Position[T any](sl []T, predicate func(v T) bool) int {
 	return -1
 }
 func PositionLast[T any](sl []T, predicate func(v T) bool) int {
-	if sl == nil || len(sl) == 0 || predicate == nil {
+	if len(sl) == 0 || predicate == nil {
 		return -1
 	}
 	for i := len(sl) - 1; i >= 0; i-- {
