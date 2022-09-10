@@ -1,87 +1,114 @@
 package atomicparam_test
 
 import (
+	"bytes"
 	"reflect"
 	"testing"
 
 	atomicparam "github.com/ngicks/type-param-common/sync-param/atomic-param"
 )
 
+type dummyEnum uint8
+
+const (
+	invalid dummyEnum = iota
+	foo
+	bar
+	baz
+)
+
 func TestAtomic(t *testing.T) {
-	t.Run("non pointer type", func(t *testing.T) {
-		// string technically is a pointer type, being Vector of uint8.
-		// Golang treats string as non-pointer type.
-		val := atomicparam.NewValue[string]()
+	t.Run("dummyEnum", func(t *testing.T) {
+		values := []dummyEnum{foo, bar, baz}
+		testValue(t, atomicparam.NewValue[dummyEnum](), values, true)
+		testValue(t, atomicparam.Value[dummyEnum]{}, values, false)
+	})
+	t.Run("string", func(t *testing.T) {
+		values := []string{"foo", "bar", "baz"}
+		testValue(t, atomicparam.NewValue[string](), values, true)
+		testValue(t, atomicparam.Value[string]{}, values, false)
+	})
+	t.Run("*bytes.Buffer", func(t *testing.T) {
+		values := []*bytes.Buffer{
+			bytes.NewBuffer(make([]byte, 0)),
+			nil,
+			bytes.NewBuffer(make([]byte, 0)),
+		}
+		testValue(t, atomicparam.NewValue[*bytes.Buffer](), values, true)
+		testValue(t, atomicparam.Value[*bytes.Buffer]{}, values, false)
+	})
+}
 
-		var v string
+func testValue[T comparable](t *testing.T, val atomicparam.Value[T], values []T, shouldReturnNormally bool) {
+	var v T
 
+	var returnedNormally bool
+	func() {
+		defer func() {
+			if recv := recover(); recv != nil {
+				if shouldReturnNormally {
+					t.Error(recv)
+				}
+			}
+		}()
 		v = val.Load()
 		if !reflect.ValueOf(v).IsZero() {
 			t.Fatalf("must be zero value")
 		}
+		returnedNormally = true
+	}()
 
-		val.Store("foo")
-		v = val.Load()
-		if !reflect.DeepEqual(v, "foo") {
-			t.Fatalf("unmatched result, expected=%v, actual=%v", "foo", v)
-		}
+	if returnedNormally != shouldReturnNormally {
+		t.Fatalf(
+			"mismatched cond, shouldReturnNormally = %t, but returnedNormally = %t",
+			shouldReturnNormally,
+			returnedNormally,
+		)
+	}
 
-		val.Swap("bar")
-
-		v = val.Load()
-		if !reflect.DeepEqual(v, "bar") {
-			t.Fatalf("unmatched result, expected=%v, actual=%v", "bar", v)
-		}
-
-		var swapped bool
-		swapped = val.CompareAndSwap("bar", "baz")
-		if !swapped {
-			t.Fatalf("must be swapped")
-		}
-		swapped = val.CompareAndSwap("bar", "baz")
-		if swapped {
-			t.Fatalf("must not be swapped")
-		}
-	})
-
-	t.Run("slice", func(t *testing.T) {
-		val := atomicparam.NewValue[*[]string]()
-
-		var v *[]string
-
-		v = val.Load()
+	func() {
+		defer func() {
+			if recv := recover(); recv != nil {
+				if shouldReturnNormally {
+					t.Error(recv)
+				}
+			}
+		}()
+		v = val.Swap(values[0])
 		if !reflect.ValueOf(v).IsZero() {
 			t.Fatalf("must be zero value")
 		}
+		returnedNormally = true
+	}()
 
-		val.Store(&[]string{"foo", "bar", "baz"})
-		v = val.Load()
-		if !reflect.DeepEqual(v, &[]string{"foo", "bar", "baz"}) {
-			t.Fatalf("unmatched result, expected=%v, actual=%v", []string{"foo", "bar", "baz"}, *v)
-		}
+	if returnedNormally != shouldReturnNormally {
+		t.Fatalf(
+			"mismatched cond, shouldReturnNormally = %t, but returnedNormally = %t",
+			shouldReturnNormally,
+			returnedNormally,
+		)
+	}
 
-		val.Swap(&[]string{"qux", "quux", "corge"})
+	val.Store(values[0])
+	v = val.Load()
+	if !reflect.DeepEqual(v, values[0]) {
+		t.Fatalf("unmatched result, expected=%v, actual=%v", "foo", v)
+	}
 
-		v = val.Load()
-		if !reflect.DeepEqual(v, &[]string{"qux", "quux", "corge"}) {
-			t.Fatalf("unmatched result, expected=%v, actual=%v", []string{"qux", "quux", "corge"}, *v)
-		}
+	val.Swap(values[1])
 
-		var swapped bool
-		sl := []string{"grault", "garply", "waldo"}
-		swapped = val.CompareAndSwap(&[]string{"qux", "quux", "corge"}, &sl)
-		if swapped {
-			// it is pointer value.
-			t.Fatalf("must not be swapped")
-		}
-		val.Store(&sl)
-		swapped = val.CompareAndSwap(&sl, &[]string{"qux", "quux", "corge"})
-		if !swapped {
-			t.Fatalf("must be swapped")
-		}
-		v = val.Load()
-		if !reflect.DeepEqual(v, &[]string{"qux", "quux", "corge"}) {
-			t.Fatalf("value mismatch, expeceted=%v, actual=%v", []string{"qux", "quux", "corge"}, *v)
-		}
-	})
+	v = val.Load()
+	if !reflect.DeepEqual(v, values[1]) {
+		t.Fatalf("unmatched result, expected=%v, actual=%v", bar, v)
+	}
+
+	var swapped bool
+	swapped = val.CompareAndSwap(values[1], values[2])
+	if !swapped {
+		t.Fatalf("must be swapped")
+	}
+	swapped = val.CompareAndSwap(values[1], values[2])
+	if swapped {
+		t.Fatalf("must not be swapped")
+	}
 }
