@@ -53,6 +53,14 @@ func (e *Element[T]) Prev() *Element[T] {
 	return e.entMap.getOrCreate(e.inner.Prev())
 }
 
+// List[T] is `container/list` wrapper that is safe to use with type T.
+//
+// It holds *`container/list`.List and map[*list.Element]*Element[T].
+// This map maps *Element[T] to *list.Element
+// so that you can identify elements by simple comparision like eleA == eleB.
+//
+// List[T] tries best to be consistent with `container/list`.
+// The zero value of List[T] is a valid empty list (which will be lazily initialized).
 type List[T any] struct {
 	inner  *list.List
 	entMap entMap[T]
@@ -116,29 +124,45 @@ func (l *List[T]) MoveToFront(e *Element[T]) {
 	l.lazyInit()
 	l.inner.MoveToFront(e.inner)
 }
+
+// PushBack inserts v at end of the list
+// and returns inserted element.
 func (l *List[T]) PushBack(v T) *Element[T] {
 	l.lazyInit()
 	return l.entMap.createInsertingElement(l.inner.PushBack(v))
 }
+
+// PushBackList copies values of other and inserts them into back of l.
+//
+// Both l and other must not be nil.
 func (l *List[T]) PushBackList(other *List[T]) {
 	l.lazyInit()
 	other.lazyInit()
 	l.inner.PushBackList(other.inner)
 }
+
+// PushFront inserts v at front of the list
+// and returns inserted element.
 func (l *List[T]) PushFront(v T) *Element[T] {
 	l.lazyInit()
 	return l.entMap.createInsertingElement(l.inner.PushFront(v))
 }
+
+// PushFrontList copies values of other and inserts them into front of l.
+//
+// Both l and other must not be nil.
 func (l *List[T]) PushFrontList(other *List[T]) {
 	l.lazyInit()
 	other.lazyInit()
 	l.inner.PushFrontList(other.inner)
 }
 
-// Remove calls Remove method of internal `container/list`.List.
-// If Remove returns non-nil value then removed is true, false otherwize.
-// When removed is false returned v is zero of T.
-func (l *List[T]) Remove(e *Element[T]) (v T, removed bool) {
+// Remove removes element from list l
+// and returns value of e.
+// hadValue is false when e.Value is nil.
+//
+// e must not be nil.
+func (l *List[T]) Remove(e *Element[T]) (v T, hadValue bool) {
 	l.lazyInit()
 	delete(l.entMap, e.inner)
 	if ele := l.inner.Remove(e.inner); ele != nil {
