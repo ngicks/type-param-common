@@ -18,3 +18,15 @@ func (q *Queue[T]) Push(v T) {
 func (q *Queue[T]) Pop() (v T, popped bool) {
 	return popFront((*[]T)(q))
 }
+
+// Clone copies inner slice.
+func (q *Queue[T]) Clone() Queue[T] {
+	return Clone(*q)
+}
+
+func (q *Queue[T]) Prepend(elements ...T) {
+	if elements == nil {
+		return
+	}
+	*q = Prepend(*q, elements...)
+}

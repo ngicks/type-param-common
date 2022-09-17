@@ -69,4 +69,62 @@ func testDequeue(t *testing.T, deque slice.Deque[int]) {
 			t.Fatalf("incorrect pop behavior: expected to be %v, but is %v", expected, popped)
 		}
 	}
+
+	deque.Append([]int{1, 2, 3, 4, 5}...)
+	if expected := []int{1, 2, 3, 4, 5}; !reflect.DeepEqual(expected, []int(deque)) {
+		t.Fatalf("incorrect append behavior: expected to be %v, but is %v", expected, deque)
+	}
+	deque.Append([]int{9, 10, 11, 12}...)
+	if expected := []int{1, 2, 3, 4, 5, 9, 10, 11, 12}; !reflect.DeepEqual(expected, []int(deque)) {
+		t.Fatalf("incorrect append behavior: expected to be %v, but is %v", expected, deque)
+	}
+
+	deque = []int{}
+
+	deque.Prepend([]int{1, 2, 3, 4, 5}...)
+	if expected := []int{5, 4, 3, 2, 1}; !reflect.DeepEqual(expected, ([]int)(deque)) {
+		t.Fatalf("incorrect prepend behavior: expected to be %v, but is %v", expected, deque)
+	}
+
+	deque.Prepend([]int{11, 12, 13, 14, 15}...)
+	if expected := []int{15, 14, 13, 12, 11, 5, 4, 3, 2, 1}; !reflect.DeepEqual(expected, ([]int)(deque)) {
+		t.Fatalf("incorrect prepend behavior: expected to be %v, but is %v", expected, deque)
+	}
+
+	cloned := deque.Clone()
+	if !reflect.DeepEqual(deque, cloned) {
+		t.Fatalf("incorrect clone behavior: expected to be %v, but is %v", deque, cloned)
+	}
+	cloned[1] = 13
+	if cloned[1] == deque[1] {
+		t.Fatalf("incorrect clone behavior: expected to be %v, but is %v", cloned[1], deque[1])
+	}
+
+	if g, ok := deque.Get(1); !ok || g != deque[1] {
+		t.Fatalf("incorrect get behavior: expected to be %v, but is %v", deque[1], g)
+	}
+	if g, ok := deque.Get(100); ok || g != 0 {
+		t.Fatalf("incorrect get behavior: expected to be %v, but is %v", deque[1], g)
+	}
+
+	deque = []int{}
+	deque.Append([]int{0, 1, 2, 3, 4}...)
+	deque.Insert(0, 150)
+	if expected := []int{150, 0, 1, 2, 3, 4}; !reflect.DeepEqual(expected, []int(deque)) {
+		t.Fatalf("incorrect append behavior: expected to be %v, but is %v", expected, deque)
+	}
+	deque.Insert(4, 200)
+	if expected := []int{150, 0, 1, 2, 200, 3, 4}; !reflect.DeepEqual(expected, []int(deque)) {
+		t.Fatalf("incorrect append behavior: expected to be %v, but is %v", expected, deque)
+	}
+
+	func() {
+		defer func() {
+			recv := recover()
+			if recv == nil {
+				t.Fatalf("must panic")
+			}
+		}()
+		deque.Insert(uint(deque.Len()+1), 120)
+	}()
 }

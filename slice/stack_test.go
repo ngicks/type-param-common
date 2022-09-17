@@ -65,4 +65,22 @@ func testStack(t *testing.T, stack slice.Stack[int]) {
 			t.Fatalf("incorrect pop behavior: expected to be %v, but is %v", expected, popped)
 		}
 	}
+
+	stack.Append([]int{1, 2, 3, 4, 5}...)
+	if expected := []int{1, 2, 3, 4, 5}; !reflect.DeepEqual(expected, []int(stack)) {
+		t.Fatalf("incorrect append behavior: expected to be %v, but is %v", expected, stack)
+	}
+	stack.Append([]int{9, 10, 11, 12}...)
+	if expected := []int{1, 2, 3, 4, 5, 9, 10, 11, 12}; !reflect.DeepEqual(expected, []int(stack)) {
+		t.Fatalf("incorrect append behavior: expected to be %v, but is %v", expected, stack)
+	}
+
+	cloned := stack.Clone()
+	if !reflect.DeepEqual(stack, cloned) {
+		t.Fatalf("incorrect clone behavior: expected to be %v, but is %v", stack, cloned)
+	}
+	cloned[1] = 13
+	if cloned[1] == stack[1] {
+		t.Fatalf("incorrect clone behavior: expected to be %v, but is %v", cloned[1], stack[1])
+	}
 }

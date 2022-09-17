@@ -17,3 +17,11 @@ func (s *Stack[T]) Push(v T) {
 func (s *Stack[T]) Pop() (v T, popped bool) {
 	return popBack((*[]T)(s))
 }
+
+func (s *Stack[T]) Clone() Stack[T] {
+	return Clone(*s)
+}
+
+func (s *Stack[T]) Append(elements ...T) {
+	*s = Append(*s, elements...)
+}

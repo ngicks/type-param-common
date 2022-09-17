@@ -40,6 +40,33 @@ func (d *Deque[T]) PopFront() (v T, popped bool) {
 	return popFront((*[]T)(d))
 }
 
+func (d *Deque[T]) Get(index uint) (v T, ok bool) {
+	return Get(*d, index)
+}
+
+// Clone copies inner slice.
+func (d *Deque[T]) Clone() Deque[T] {
+	return Clone(*d)
+}
+
+func (d *Deque[T]) Insert(index uint, ele T) {
+	*d = Insert(*d, index, ele)
+}
+
+func (d *Deque[T]) Append(elements ...T) {
+	if elements == nil {
+		return
+	}
+	*d = Append(*d, elements...)
+}
+
+func (d *Deque[T]) Prepend(elements ...T) {
+	if elements == nil {
+		return
+	}
+	*d = Prepend(*d, elements...)
+}
+
 func pushBack[T any](sl *[]T, v T) {
 	*sl = append(*sl, v)
 }
