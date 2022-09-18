@@ -39,20 +39,18 @@ func (h *FilterableHeap[U, T]) Len() int {
 }
 
 // Clone clones internal slice and creates new FilterableHeap with it.
-// This is done by simple slice copy.
+// This is done by simple slice copy, without succeeding Init call,
+// which means it also clones broken invariants if any.
+//
 // If type T or one of its internal value is pointer type,
 // mutation of T porpagates cloned to original, and vice versa.
 func (h *FilterableHeap[U, T]) Clone() *FilterableHeap[U, T] {
 	cloned := make([]T, len(h.internal.Inner))
 	copy(cloned, h.internal.Inner)
 
-	return &FilterableHeap[U, T]{
-		HeapWrapper: h.HeapWrapper,
-		internal: &SliceInterface[T]{
-			Inner: cloned,
-			less:  h.internal.less,
-		},
-	}
+	n := NewFilterableHeap[U, T]()
+	n.internal.Inner = cloned
+	return n
 }
 
 // Filter calls filterFuncs one by one, in given order, with following heap.Init().

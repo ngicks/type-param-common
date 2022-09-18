@@ -114,12 +114,12 @@ func TestHeapWithAdditionalProps(t *testing.T) {
 		cloned := h.Clone()
 
 		var out slice.Deque[int]
-		for h.Len() == 0 {
+		for h.Len() > 0 {
 			out.PushBack(int(h.Pop().Inner()))
 		}
 
 		var outCloned slice.Deque[int]
-		for cloned.Len() == 0 {
+		for cloned.Len() > 0 {
 			outCloned.PushBack(int(cloned.Pop().Inner()))
 		}
 
