@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	typeparamcommon "github.com/ngicks/type-param-common"
+	"github.com/ngicks/type-param-common/slice"
 )
 
 type Int int
@@ -96,6 +97,36 @@ func TestHeapWithAdditionalProps(t *testing.T) {
 		removed = lenBefore - h.Len()
 		if removed != 2 {
 			t.Fatalf("removed len must be %d, but is %d", 3, removed)
+		}
+	})
+
+	t.Run("Clone", func(t *testing.T) {
+		h := typeparamcommon.NewFilterableHeap[Int, typeparamcommon.Lessable[Int]]()
+
+		h.Push(Int(7))
+		h.Push(Int(4))
+		h.Push(Int(1))
+		h.Push(Int(6))
+		h.Push(Int(5))
+		h.Push(Int(3))
+		h.Push(Int(2))
+
+		cloned := h.Clone()
+
+		var out slice.Deque[int]
+		for h.Len() == 0 {
+			out.PushBack(int(h.Pop().Inner()))
+		}
+
+		var outCloned slice.Deque[int]
+		for cloned.Len() == 0 {
+			outCloned.PushBack(int(cloned.Pop().Inner()))
+		}
+
+		for i := 0; i < len(out); i++ {
+			if out[i] != outCloned[i] {
+				t.Fatalf("not equal. expected = %d, actual = %d", out[i], outCloned[i])
+			}
 		}
 	})
 }
