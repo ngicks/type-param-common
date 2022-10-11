@@ -5,11 +5,12 @@
 package ringparam
 
 import (
-	"reflect"
 	"testing"
 
+	"github.com/google/go-cmp/cmp"
 	"github.com/ngicks/type-param-common/iterator"
 	"github.com/ngicks/type-param-common/slice"
+	"github.com/stretchr/testify/require"
 )
 
 func TestExampleDo(t *testing.T) {
@@ -32,9 +33,12 @@ func TestExampleDo(t *testing.T) {
 	})
 
 	expected := iterator.FromRange(0, 5).Collect()
-	if !reflect.DeepEqual(expected, ([]int)(output)) {
-		t.Fatalf("not equal. expected = %+v, actual = %+v", expected, output)
-	}
+
+	require.Condition(
+		t,
+		func() (success bool) { return cmp.Equal(expected, ([]int)(output)) },
+		cmp.Diff(expected, ([]int)(output)),
+	)
 }
 
 func TestExampleLen(t *testing.T) {
@@ -77,9 +81,11 @@ func TestExampleLink(t *testing.T) {
 	})
 
 	expected := []int{0, 0, 1, 1}
-	if !reflect.DeepEqual(expected, ([]int)(output)) {
-		t.Fatalf("not equal. expected = %+v, actual = %+v", expected, output)
-	}
+	require.Condition(
+		t,
+		func() (success bool) { return cmp.Equal(expected, ([]int)(output)) },
+		cmp.Diff(expected, ([]int)(output)),
+	)
 }
 
 func TestExampleMove(t *testing.T) {
@@ -105,9 +111,11 @@ func TestExampleMove(t *testing.T) {
 	})
 
 	expected := []int{3, 4, 0, 1, 2}
-	if !reflect.DeepEqual(expected, ([]int)(output)) {
-		t.Fatalf("not equal. expected = %+v, actual = %+v", expected, output)
-	}
+	require.Condition(
+		t,
+		func() (success bool) { return cmp.Equal(expected, ([]int)(output)) },
+		cmp.Diff(expected, ([]int)(output)),
+	)
 }
 
 func TestExampleNext(t *testing.T) {
@@ -132,9 +140,11 @@ func TestExampleNext(t *testing.T) {
 	}
 
 	expected := iterator.FromRange(0, 5).Collect()
-	if !reflect.DeepEqual(expected, ([]int)(output)) {
-		t.Fatalf("not equal. expected = %+v, actual = %+v", expected, output)
-	}
+	require.Condition(
+		t,
+		func() (success bool) { return cmp.Equal(expected, ([]int)(output)) },
+		cmp.Diff(expected, ([]int)(output)),
+	)
 }
 
 func TestExamplePrev(t *testing.T) {
@@ -159,9 +169,11 @@ func TestExamplePrev(t *testing.T) {
 	}
 
 	expected := iterator.FromRange(0, 5).MustReverse().Collect()
-	if !reflect.DeepEqual(expected, ([]int)(output)) {
-		t.Fatalf("not equal. expected = %+v, actual = %+v", expected, output)
-	}
+	require.Condition(
+		t,
+		func() (success bool) { return cmp.Equal(expected, ([]int)(output)) },
+		cmp.Diff(expected, ([]int)(output)),
+	)
 }
 
 func TestExampleUnlink(t *testing.T) {
@@ -187,9 +199,11 @@ func TestExampleUnlink(t *testing.T) {
 	})
 
 	expected := []int{0, 4, 5}
-	if !reflect.DeepEqual(expected, ([]int)(output)) {
-		t.Fatalf("not equal. expected = %+v, actual = %+v", expected, output)
-	}
+	require.Condition(
+		t,
+		func() (success bool) { return cmp.Equal(expected, ([]int)(output)) },
+		cmp.Diff(expected, ([]int)(output)),
+	)
 }
 
 func TestPointerConsistency(t *testing.T) {
@@ -236,12 +250,31 @@ func TestPointerConsistency(t *testing.T) {
 		s = s.Next()
 	}
 
-	if !reflect.DeepEqual(rp, rpAgain) {
-		t.Fatalf("not equal. expected = %p, actual = %p", rp, rpAgain)
+	// reflect.DeepEqual ignores index order. This ensures left and right are completely same slice.
+	equal := func(left, right []*Ring[int]) bool {
+		if len(left) != len(right) {
+			return false
+		}
+		for i := 0; i < len(left); i++ {
+			if left[i] != right[i] {
+				return false
+			}
+		}
+		return true
 	}
-	if !reflect.DeepEqual(sp, spAgain) {
-		t.Fatalf("not equal. expected = %p, actual = %p", sp, spAgain)
-	}
+
+	require.Condition(
+		t,
+		func() (success bool) {
+			return equal(rp, rpAgain)
+		},
+	)
+	require.Condition(
+		t,
+		func() (success bool) {
+			return equal(sp, spAgain)
+		},
+	)
 
 	// check if no ent is added.
 	if len(r.entMap) != 6 {

@@ -4,7 +4,9 @@ import (
 	"reflect"
 	"testing"
 
+	"github.com/google/go-cmp/cmp"
 	"github.com/ngicks/type-param-common/iterator"
+	"github.com/stretchr/testify/require"
 )
 
 func TestChain(t *testing.T) {
@@ -77,7 +79,9 @@ func TestChainReversed(t *testing.T) {
 		t.Fatal("must be drained")
 	}
 
-	if !reflect.DeepEqual(expected, answer) {
-		t.Fatalf("must be deeply equal. expected = %+v, actual = %+v", expected, answer)
-	}
+	require.Condition(
+		t,
+		func() (success bool) { return cmp.Equal(expected, answer) },
+		cmp.Diff(expected, answer),
+	)
 }
