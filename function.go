@@ -17,3 +17,10 @@ func Must3[T any, U any](val1 T, val2 U, err error) (T, U) {
 	}
 	return val1, val2
 }
+
+// Escape escapes v to a pointer of v.
+//
+// It is useful when setting built-in type T to struct fields of *T.
+func Escape[T any](v T) *T {
+	return &v
+}
