@@ -18,7 +18,7 @@ Wrappers of Go std lib are suffixed with `-param`
 - list-param
   - STATUS: done. most of behavior consistent to `container/list`.
 - ring-param
-  - STATUS: not yet done. Usable but behavior is not consistent with `container/ring`. you can not compare ringA == ringB to check identity.
+  - STATUS: Half done. Needs good testing.
 
 Heap-param wraps `container/heap` of standard library.
 see `./heap.go`, `./filterable_heap.go` and corresponding test files for example usages.
@@ -99,12 +99,13 @@ func main() {
 It requires Singly ended iterator as embeded field. Iterator[T] is thin helper type. Chance to have breaking change (e.g. new field) is low.
 
 Iterator[T] can be created directly from
+
 - slice []T
 - listparam.List[T]
 - channel <-chan T
 
 ```go
-var iter iterator.Iterator[string] 
+var iter iterator.Iterator[string]
 iter = iterator.FromSlice(strSlice)
 // or
 // for size-fixed iterator
