@@ -52,6 +52,12 @@ func FromSlice[T any](sl []T) Iterator[T] {
 	}
 }
 
+func FromMap[T comparable, U any](m map[T]U, keySortOption func(keys []T) []T) Iterator[TwoEleTuple[T, U]] {
+	return Iterator[TwoEleTuple[T, U]]{
+		SeIterator: NewMapIterDe(m, keySortOption),
+	}
+}
+
 func FromFixedList[T any](list *listparam.List[T]) Iterator[T] {
 	return Iterator[T]{
 		SeIterator: NewListIterDe(list),
