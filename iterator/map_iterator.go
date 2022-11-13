@@ -9,7 +9,7 @@ type MapIterDe[T comparable, U any] struct {
 	idxBack  int
 }
 
-// NewMapIterDe makes SliceIterDe[T] from []T.
+// NewMapIterDe makes MapIterDe[T, U] from map[T]U.
 //
 // m should not be mutated after the return of this function. Otherwise behavior is undefined.
 //
