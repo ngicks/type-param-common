@@ -9,11 +9,11 @@ import (
 
 type Int int
 
-func (i Int) Inner() Int {
+func (i Int) Unwrap() Int {
 	return i
 }
-func (i Int) LessThan(j typeparamcommon.Lessable[Int]) bool {
-	return i < j.Inner()
+func (i Int) Less(j typeparamcommon.Lessable[Int]) bool {
+	return i < j.Unwrap()
 }
 
 func TestHeapWithAdditionalProps(t *testing.T) {
@@ -28,14 +28,14 @@ func TestHeapWithAdditionalProps(t *testing.T) {
 		h.Push(Int(3))
 		h.Push(Int(2))
 
-		execlude := typeparamcommon.BuildExcludeFilter(
+		exclude := typeparamcommon.BuildExcludeFilter(
 			-1,
 			100,
-			func(ent typeparamcommon.Lessable[Int]) bool { return ent.Inner()%2 == 0 },
+			func(ent typeparamcommon.Lessable[Int]) bool { return ent.Unwrap()%2 == 0 },
 		)
 
 		lenBefore := h.Len()
-		h.Filter(execlude)
+		h.Filter(exclude)
 		removed := lenBefore - h.Len()
 
 		if removed != 3 {
@@ -44,7 +44,7 @@ func TestHeapWithAdditionalProps(t *testing.T) {
 
 		for i := 1; i <= 7; i = i + 2 {
 			popped := h.Pop()
-			if int(popped.Inner()) != i {
+			if int(popped.Unwrap()) != i {
 				t.Errorf("pop = %v expected %v", popped, i)
 			}
 		}
@@ -61,14 +61,14 @@ func TestHeapWithAdditionalProps(t *testing.T) {
 		h.Push(Int(3))
 		h.Push(Int(2))
 
-		execlude = typeparamcommon.BuildExcludeFilter(
+		exclude = typeparamcommon.BuildExcludeFilter(
 			0,
 			3,
-			func(ent typeparamcommon.Lessable[Int]) bool { return ent.Inner()%2 == 0 },
+			func(ent typeparamcommon.Lessable[Int]) bool { return ent.Unwrap()%2 == 0 },
 		)
 
 		lenBefore = h.Len()
-		h.Filter(execlude)
+		h.Filter(exclude)
 		removed = lenBefore - h.Len()
 
 		if removed != 1 {
@@ -87,13 +87,13 @@ func TestHeapWithAdditionalProps(t *testing.T) {
 		h.Push(Int(3))
 		h.Push(Int(2))
 
-		execlude = typeparamcommon.BuildExcludeFilter(
+		exclude = typeparamcommon.BuildExcludeFilter(
 			3,
 			6,
-			func(ent typeparamcommon.Lessable[Int]) bool { return ent.Inner()%2 == 0 },
+			func(ent typeparamcommon.Lessable[Int]) bool { return ent.Unwrap()%2 == 0 },
 		)
 		lenBefore = h.Len()
-		h.Filter(execlude)
+		h.Filter(exclude)
 		removed = lenBefore - h.Len()
 		if removed != 2 {
 			t.Fatalf("removed len must be %d, but is %d", 3, removed)
@@ -115,12 +115,12 @@ func TestHeapWithAdditionalProps(t *testing.T) {
 
 		var out slice.Deque[int]
 		for h.Len() > 0 {
-			out.PushBack(int(h.Pop().Inner()))
+			out.PushBack(int(h.Pop().Unwrap()))
 		}
 
 		var outCloned slice.Deque[int]
 		for cloned.Len() > 0 {
-			outCloned.PushBack(int(cloned.Pop().Inner()))
+			outCloned.PushBack(int(cloned.Pop().Unwrap()))
 		}
 
 		for i := 0; i < len(out); i++ {

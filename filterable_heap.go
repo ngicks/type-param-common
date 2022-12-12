@@ -1,9 +1,11 @@
 package typeparamcommon
 
 type Lessable[T any] interface {
-	Inner() T
-	// LessThan determines self is less than input Lessable[T].
-	LessThan(Lessable[T]) bool
+	// Unwrap unwraps interface Lessable[T] to T.
+	Unwrap() T
+	// Less reports whether the self
+	// must sort before v.
+	Less(v Lessable[T]) bool
 }
 
 type FilterableHeap[U any, T Lessable[U]] struct {
@@ -12,7 +14,7 @@ type FilterableHeap[U any, T Lessable[U]] struct {
 }
 
 func genericLess[U any, T Lessable[U]](i T, j T) bool {
-	return i.LessThan(j)
+	return i.Less(j)
 }
 
 func NewFilterableHeap[U any, T Lessable[U]]() *FilterableHeap[U, T] {
@@ -43,7 +45,7 @@ func (h *FilterableHeap[U, T]) Len() int {
 // which means it also clones broken invariants if any.
 //
 // If type T or one of its internal value is pointer type,
-// mutation of T porpagates cloned to original, and vice versa.
+// mutation of T propagates cloned to original, and vice versa.
 func (h *FilterableHeap[U, T]) Clone() *FilterableHeap[U, T] {
 	cloned := make([]T, len(h.internal.Inner))
 	copy(cloned, h.internal.Inner)
