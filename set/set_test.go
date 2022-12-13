@@ -5,9 +5,11 @@ import (
 	"testing"
 	"time"
 
-	"github.com/ngicks/type-param-common/iterator"
 	"github.com/ngicks/type-param-common/slice"
 )
+
+var _ SetLike[int] = &Set[int]{}
+var _ SetLike[int] = &OrderedSet[int]{}
 
 var utc, jst *time.Location
 
@@ -44,7 +46,7 @@ func TestOrderedSetOrdering(t *testing.T) {
 
 	expected := []int{5, 4, 3, 2, 1}
 
-	assertInsertionOerder := func(t *testing.T, set setInterface[int], expected []int) {
+	assertInsertionOerder := func(t *testing.T, set SetLike[int], expected []int) {
 		collected := set.Values().Collect()
 		if !reflect.DeepEqual(expected, collected) {
 			t.Fatalf("must be deeply equal.\nexpected = %+v\nactual = %+v\n", expected, collected)
@@ -66,17 +68,7 @@ func TestOrderedSetOrdering(t *testing.T) {
 
 }
 
-type setInterface[T comparable] interface {
-	Len() int
-	Add(v T)
-	Clear()
-	Delete(v T) (deleted bool)
-	ForEach(f func(v T, idx int))
-	Has(v T) (has bool)
-	Values() iterator.Iterator[T]
-}
-
-func testSetWithTimeKey(t *testing.T, set setInterface[time.Time]) {
+func testSetWithTimeKey(t *testing.T, set SetLike[time.Time]) {
 	now := time.Now()
 	year, month, day := now.Date()
 	hour, minute, second := now.Clock()
