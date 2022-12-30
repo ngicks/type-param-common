@@ -2,12 +2,15 @@ package slice_test
 
 import (
 	"reflect"
+	"runtime"
+	"sync/atomic"
 	"testing"
 
 	"github.com/ngicks/type-param-common/slice"
 )
 
 func TestDequeue(t *testing.T) {
+	testDequeue(t, make(slice.Deque[int], 0))
 	testDequeue(t, slice.Deque[int]{})
 	testDequeue(t, nil)
 }
@@ -127,4 +130,62 @@ func testDequeue(t *testing.T, deque slice.Deque[int]) {
 		}()
 		deque.Insert(uint(deque.Len()+1), 120)
 	}()
+}
+
+func TestDeque_popped_element_can_be_GCed(t *testing.T) {
+	// Do not make this like slice.Deque[*int]{}
+	// I dunno much about it but seemingly
+	// Go compiler optimizes int to be like uint.
+	// And it causes this test to be flaky and unable to pass.
+	d := slice.Deque[*string]{}
+
+	// called is count for set finalizer ever called.
+	var called int64
+
+	for _, v := range []string{"foo", "bar", "baz", "qux", "quux"} {
+		copied := v
+		runtime.SetFinalizer(&copied, func(*string) {
+			atomic.AddInt64(&called, 1)
+		})
+		d.Push(&copied)
+	}
+
+	if loaded := atomic.LoadInt64(&called); loaded != 0 {
+		t.Fatalf("finalizer must not be called at this moment, is %d", loaded)
+	}
+
+	d.PopBack()
+	runtime.GC()
+	for _, v := range d {
+		// keeping alive references.
+		runtime.KeepAlive(v)
+	}
+	runtime.GC()
+	if loaded := atomic.LoadInt64(&called); loaded != 1 {
+		t.Fatalf("finalizer must be called once, but is %d", loaded)
+	}
+
+	d.PopBack()
+	runtime.GC()
+	for _, v := range d {
+		runtime.KeepAlive(v)
+	}
+	runtime.GC()
+	if loaded := atomic.LoadInt64(&called); loaded != 2 {
+		t.Fatalf("finalizer must be called twice, but is %d", loaded)
+	}
+
+	d.PopFront()
+	runtime.GC()
+	for _, v := range d {
+		runtime.KeepAlive(v)
+	}
+	runtime.GC()
+	if loaded := atomic.LoadInt64(&called); loaded != 3 {
+		t.Fatalf("finalizer must be called 3 times, but is %d", loaded)
+	}
+
+	for _, v := range d {
+		runtime.KeepAlive(v)
+	}
 }
