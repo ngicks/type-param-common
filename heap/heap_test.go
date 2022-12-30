@@ -8,7 +8,7 @@ import (
 	heapparam "github.com/ngicks/type-param-common/heap-param"
 )
 
-var _ heapparam.Interface[int] = heap.NewSliceInterface[int](nil, nil, heap.HeapMethods[int]{})
+var _ heapparam.Interface[int] = heap.NewSliceInterface(nil, nil, heap.HeapMethods[int]{})
 
 func TestSimpleHeap(t *testing.T) {
 	// Seeing basic delegation.

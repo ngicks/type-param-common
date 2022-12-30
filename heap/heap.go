@@ -6,6 +6,8 @@ import (
 	"golang.org/x/exp/constraints"
 )
 
+// HeapMethods is replacement methods for heap.
+// Non nil fields will be used in heap functions of corresponding name.
 type HeapMethods[T any] struct {
 	Swap func(slice *slice.Stack[T], i, j int)
 	Push func(slice *slice.Stack[T], v T)
