@@ -1,4 +1,4 @@
-package typeparamcommon
+package heap
 
 type Lessable[T any] interface {
 	// Unwrap unwraps interface Lessable[T] to T.

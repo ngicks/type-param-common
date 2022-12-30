@@ -1,16 +1,16 @@
-package typeparamcommon_test
+package heap_test
 
 import (
 	"testing"
 	"time"
 
-	typeparamcommon "github.com/ngicks/type-param-common"
+	"github.com/ngicks/type-param-common/heap"
 )
 
 func TestSimpleHeap(t *testing.T) {
 	// Seeing basic delegation.
 	t.Run("int heap", func(t *testing.T) {
-		h, inter := typeparamcommon.MakeMinHeap[int]()
+		h, inter := heap.MakeMinHeap[int]()
 		ans := []int{3, 4, 4, 5, 6}
 		h.Push(5)
 		h.Push(4)
@@ -37,7 +37,7 @@ func TestSimpleHeap(t *testing.T) {
 			return i.t.Before(j.t)
 		}
 
-		h, inter := typeparamcommon.MakeHeap(less)
+		h, inter := heap.MakeHeap(less)
 		ans := []*testStruct{
 			{t: time.Date(2021, 1, 1, 0, 0, 0, 0, time.UTC)},
 			{t: time.Date(2021, 2, 1, 0, 0, 0, 0, time.UTC)},

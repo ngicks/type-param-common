@@ -1,9 +1,9 @@
-package typeparamcommon_test
+package heap_test
 
 import (
 	"testing"
 
-	typeparamcommon "github.com/ngicks/type-param-common"
+	"github.com/ngicks/type-param-common/heap"
 	"github.com/ngicks/type-param-common/slice"
 )
 
@@ -12,13 +12,13 @@ type Int int
 func (i Int) Unwrap() Int {
 	return i
 }
-func (i Int) Less(j typeparamcommon.Lessable[Int]) bool {
+func (i Int) Less(j heap.Lessable[Int]) bool {
 	return i < j.Unwrap()
 }
 
 func TestHeapWithAdditionalProps(t *testing.T) {
 	t.Run("Exclude", func(t *testing.T) {
-		h := typeparamcommon.NewFilterableHeap[Int, typeparamcommon.Lessable[Int]]()
+		h := heap.NewFilterableHeap[Int, heap.Lessable[Int]]()
 
 		h.Push(Int(7))
 		h.Push(Int(4))
@@ -28,10 +28,10 @@ func TestHeapWithAdditionalProps(t *testing.T) {
 		h.Push(Int(3))
 		h.Push(Int(2))
 
-		exclude := typeparamcommon.BuildExcludeFilter(
+		exclude := heap.BuildExcludeFilter(
 			-1,
 			100,
-			func(ent typeparamcommon.Lessable[Int]) bool { return ent.Unwrap()%2 == 0 },
+			func(ent heap.Lessable[Int]) bool { return ent.Unwrap()%2 == 0 },
 		)
 
 		lenBefore := h.Len()
@@ -61,10 +61,10 @@ func TestHeapWithAdditionalProps(t *testing.T) {
 		h.Push(Int(3))
 		h.Push(Int(2))
 
-		exclude = typeparamcommon.BuildExcludeFilter(
+		exclude = heap.BuildExcludeFilter(
 			0,
 			3,
-			func(ent typeparamcommon.Lessable[Int]) bool { return ent.Unwrap()%2 == 0 },
+			func(ent heap.Lessable[Int]) bool { return ent.Unwrap()%2 == 0 },
 		)
 
 		lenBefore = h.Len()
@@ -87,10 +87,10 @@ func TestHeapWithAdditionalProps(t *testing.T) {
 		h.Push(Int(3))
 		h.Push(Int(2))
 
-		exclude = typeparamcommon.BuildExcludeFilter(
+		exclude = heap.BuildExcludeFilter(
 			3,
 			6,
-			func(ent typeparamcommon.Lessable[Int]) bool { return ent.Unwrap()%2 == 0 },
+			func(ent heap.Lessable[Int]) bool { return ent.Unwrap()%2 == 0 },
 		)
 		lenBefore = h.Len()
 		h.Filter(exclude)
@@ -101,7 +101,7 @@ func TestHeapWithAdditionalProps(t *testing.T) {
 	})
 
 	t.Run("Clone", func(t *testing.T) {
-		h := typeparamcommon.NewFilterableHeap[Int, typeparamcommon.Lessable[Int]]()
+		h := heap.NewFilterableHeap[Int, heap.Lessable[Int]]()
 
 		h.Push(Int(7))
 		h.Push(Int(4))

@@ -1,4 +1,4 @@
-package typeparamcommon
+package heap
 
 import (
 	heapparam "github.com/ngicks/type-param-common/heap-param"
