@@ -135,7 +135,7 @@ func testDequeue(t *testing.T, deque slice.Deque[int]) {
 func TestDeque_popped_element_can_be_GCed(t *testing.T) {
 	// Do not make this like slice.Deque[*int]{}
 	// I dunno much about it but seemingly
-	// Go compiler optimizes int to be like uint.
+	// Go compiler optimizes int to be like uint8.
 	// And it causes this test to be flaky and unable to pass.
 	d := slice.Deque[*string]{}
 
