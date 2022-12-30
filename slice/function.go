@@ -1,5 +1,9 @@
 package slice
 
+import (
+	"reflect"
+)
+
 // This file sticks its naming convention to it of Rust:
 //   - https://doc.rust-lang.org/std/iter/trait.Iterator.html
 //   - https://doc.rust-lang.org/std/vec/struct.Vec.html
@@ -12,6 +16,28 @@ func Clone[T any](sl []T) []T {
 	cloned := make([]T, len(sl))
 	copy(cloned, sl)
 	return cloned
+}
+
+func Eq[T comparable](left, right []T) bool {
+	if len(left) != len(right) {
+		return false
+	}
+
+	// Comparing types which is constrained by comparable
+	// may not be actually comparable in GO 1.20 or later version.
+	// It might cause a runtime panic.
+	var zero T
+	isComparable := reflect.TypeOf(zero).Comparable()
+	if !isComparable {
+		return false
+	}
+
+	for i := 0; i < len(left); i++ {
+		if left[i] != right[i] {
+			return false
+		}
+	}
+	return true
 }
 
 func Find[T any](sl []T, predicate func(v T) bool) (v T, found bool) {
@@ -43,7 +69,8 @@ func Has[T comparable](sl []T, target T) bool {
 
 func Insert[T any](sl []T, index uint, ele T) []T {
 	prefix, suffix := sl[:index], sl[index:]
-	// avoiding mutation of input slice.
+	// Avoiding mutation of input slice.
+	// This effectively clones input.
 	prefix = append([]T{}, prefix...)
 	return append(prefix, append([]T{ele}, suffix...)...)
 }
