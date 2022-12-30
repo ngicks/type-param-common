@@ -2,17 +2,24 @@ package heap
 
 import (
 	heapparam "github.com/ngicks/type-param-common/heap-param"
+	"github.com/ngicks/type-param-common/slice"
 	"golang.org/x/exp/constraints"
 )
 
+type HeapMethods[T any] struct {
+	Swap func(slice *slice.Stack[T], i, j int)
+	Push func(slice *slice.Stack[T], v T)
+	Pop  func(slice *slice.Stack[T]) T
+}
+
 // MakeHeap makes a heap for the type T using a less[T] function.
 //
-// 1st returned value is struct with basic set of heap methods.
-// 2nd is one that implements heap.Interface[T] which is used in *HeapWrapper[T].
 // To add your own heap methods, embed *HeapWrapper[T] to your own struct type
-// and manipulate SliceInterface[T].Inner slice in methods of that struct with succeeding *HeapWrapper.Init call.
-func MakeHeap[T any](less func(i, j T) bool) (*HeapWrapper[T], *SliceInterface[T]) {
-	internal := NewSliceInterface(nil, less)
+// to expose basic heap methods,
+// and manipulate SliceInterface[T].Inner slice in its own way.
+// Mutating inner slice may need succeeding Init() or Fix() call.
+func MakeHeap[T any](less func(i, j T) bool, methods HeapMethods[T]) (*HeapWrapper[T], *SliceInterface[T]) {
+	internal := NewSliceInterface(nil, less, methods)
 	return NewHeapWrapper[T](internal), internal
 }
 
@@ -24,19 +31,19 @@ func more[T constraints.Ordered](i, j T) bool {
 	return i > j
 }
 
-// MakeMinHeap makes a minheap for the type T.
+// MakeMinHeap makes a MinHeap for the type T.
 //
 // MakeMinHeap does what MakeHeap does but with predeclared less function.
 // T is constrained to predeclared primitive types which are compatible with less and greater comparison operations.
 func MakeMinHeap[T constraints.Ordered]() (*HeapWrapper[T], *SliceInterface[T]) {
-	internal := NewSliceInterface(nil, less[T])
+	internal := NewSliceInterface(nil, less[T], HeapMethods[T]{})
 	return NewHeapWrapper[T](internal), internal
 }
 
-// MakeMaxHeap makes a maxheap for the type T.
+// MakeMaxHeap makes a MaxHeap for the type T.
 // This is same as MakeMinHeap but uses more[T] instead.
 func MakeMaxHeap[T constraints.Ordered]() (*HeapWrapper[T], *SliceInterface[T]) {
-	internal := NewSliceInterface(nil, more[T])
+	internal := NewSliceInterface(nil, more[T], HeapMethods[T]{})
 	return NewHeapWrapper[T](internal), internal
 }
 
@@ -66,20 +73,26 @@ func (hw *HeapWrapper[T]) Remove(i int) T {
 	return heapparam.Remove(hw.inter, i)
 }
 
-var _ heapparam.Interface[int] = NewSliceInterface[int](nil, nil)
-
 type SliceInterface[T any] struct {
-	Inner []T
-	less  func(i, j T) bool
+	Inner   slice.Stack[T]
+	less    func(i, j T) bool
+	methods HeapMethods[T]
 }
 
-func NewSliceInterface[T any](init []T, less func(i, j T) bool) *SliceInterface[T] {
+// NewSliceInterface returns a newly created SliceInterface.
+// less is mandatory. Each fields of HeapMethods can be nil.
+func NewSliceInterface[T any](
+	init []T,
+	less func(i, j T) bool,
+	methods HeapMethods[T],
+) *SliceInterface[T] {
 	if init == nil {
 		init = make([]T, 0)
 	}
 	return &SliceInterface[T]{
-		Inner: init,
-		less:  less,
+		Inner:   init,
+		less:    less,
+		methods: methods,
 	}
 }
 
@@ -90,12 +103,28 @@ func (sl *SliceInterface[T]) Less(i, j int) bool {
 	return sl.less(sl.Inner[i], sl.Inner[j])
 }
 func (sl *SliceInterface[T]) Swap(i, j int) {
-	sl.Inner[i], sl.Inner[j] = sl.Inner[j], sl.Inner[i]
+	if sl.methods.Swap != nil {
+		sl.methods.Swap(&sl.Inner, i, j)
+	} else {
+		sl.Inner[i], sl.Inner[j] = sl.Inner[j], sl.Inner[i]
+	}
 }
 func (sl *SliceInterface[T]) Push(x T) {
-	sl.Inner = append(sl.Inner, x)
+	if sl.methods.Push != nil {
+		sl.methods.Push(&sl.Inner, x)
+	} else {
+		sl.Inner.Push(x)
+	}
 }
-func (sl *SliceInterface[T]) Pop() (p T) {
-	p, sl.Inner = sl.Inner[len(sl.Inner)-1], sl.Inner[:len(sl.Inner)-1]
-	return p
+func (sl *SliceInterface[T]) Pop() T {
+	if sl.methods.Pop != nil {
+		return sl.methods.Pop(&sl.Inner)
+	} else {
+		v, popped := sl.Inner.Pop()
+		if !popped {
+			// preserving the original error message.
+			_ = sl.Inner[len(sl.Inner)-1]
+		}
+		return v
+	}
 }

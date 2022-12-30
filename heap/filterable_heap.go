@@ -1,27 +1,66 @@
 package heap
 
-type Lessable[T any] interface {
-	// Unwrap unwraps interface Lessable[T] to T.
-	// This is mainly for the workaround that
-	// Go has no equivalent of Self type (other languages often have).
-	Unwrap() T
-	// Less reports whether the self
-	// must sort before v.
-	Less(v Lessable[T]) bool
+import "github.com/ngicks/type-param-common/slice"
+
+type Lesser[T any] interface {
+	Less(i, j T) bool
 }
 
-type FilterableHeap[U any, T Lessable[U]] struct {
+type Swapper[T any] interface {
+	Swap(slice *slice.Stack[T], i, j int)
+}
+
+type Pusher[T any] interface {
+	Push(slice *slice.Stack[T], v T)
+}
+
+type Popper[T any] interface {
+	Pop(slice *slice.Stack[T]) T
+}
+
+type FilterableHeap[T any] struct {
 	*HeapWrapper[T]
 	internal *SliceInterface[T]
 }
 
-func genericLess[U any, T Lessable[U]](i T, j T) bool {
-	return i.Less(j)
+// NewFilterableHeap returns newly created FilterableHeap.
+// T must implement Lesser[T], otherwise it panics.
+// T can optionally implement Swapper, Pusher, Popper.
+// If T implements those interface, methods will be used in corresponding heap functions
+// instead of default implementations.
+func NewFilterableHeap[T any]() *FilterableHeap[T] {
+	var less func(i, j T) bool
+	var hooks HeapMethods[T]
+
+	var zero T
+	var asAny any = zero
+
+	if lesser, ok := asAny.(Lesser[T]); ok {
+		less = lesser.Less
+	} else {
+		panic("T must implements Lesser[T]")
+	}
+
+	if swapper, ok := asAny.(Swapper[T]); ok {
+		hooks.Swap = swapper.Swap
+	}
+	if pusher, ok := asAny.(Pusher[T]); ok {
+		hooks.Push = pusher.Push
+	}
+	if popper, ok := asAny.(Popper[T]); ok {
+		hooks.Pop = popper.Pop
+	}
+
+	heapInternal, interfaceInternal := MakeHeap(less, hooks)
+	return &FilterableHeap[T]{
+		HeapWrapper: heapInternal,
+		internal:    interfaceInternal,
+	}
 }
 
-func NewFilterableHeap[U any, T Lessable[U]]() *FilterableHeap[U, T] {
-	heapInternal, interfaceInternal := MakeHeap(genericLess[U, T])
-	return &FilterableHeap[U, T]{
+func NewFilterableHeapHooks[T any](less func(i, j T) bool, hooks HeapMethods[T]) *FilterableHeap[T] {
+	heapInternal, interfaceInternal := MakeHeap(less, hooks)
+	return &FilterableHeap[T]{
 		HeapWrapper: heapInternal,
 		internal:    interfaceInternal,
 	}
@@ -31,14 +70,14 @@ func NewFilterableHeap[U any, T Lessable[U]]() *FilterableHeap[U, T] {
 // If this heap contains 0 element, returned p is zero value for type T.
 //
 // The complexity is O(1).
-func (h *FilterableHeap[U, T]) Peek() (p T) {
+func (h *FilterableHeap[T]) Peek() (p T) {
 	if len(h.internal.Inner) == 0 {
 		return
 	}
 	return h.internal.Inner[0]
 }
 
-func (h *FilterableHeap[U, T]) Len() int {
+func (h *FilterableHeap[T]) Len() int {
 	return h.internal.Len()
 }
 
@@ -48,11 +87,11 @@ func (h *FilterableHeap[U, T]) Len() int {
 //
 // If type T or one of its internal value is pointer type,
 // mutation of T propagates cloned to original, and vice versa.
-func (h *FilterableHeap[U, T]) Clone() *FilterableHeap[U, T] {
+func (h *FilterableHeap[T]) Clone() *FilterableHeap[T] {
 	cloned := make([]T, len(h.internal.Inner))
 	copy(cloned, h.internal.Inner)
 
-	n := NewFilterableHeap[U, T]()
+	n := NewFilterableHeap[T]()
 	n.internal.Inner = cloned
 	return n
 }
@@ -62,10 +101,10 @@ func (h *FilterableHeap[U, T]) Clone() *FilterableHeap[U, T] {
 //
 // Filter calls heap.Init() at the end of the method.
 // So the complexity is at least O(n) where n is h.Len().
-func (h *FilterableHeap[U, T]) Filter(filterFuncs ...func(innerSlice *[]T)) {
+func (h *FilterableHeap[T]) Filter(filterFuncs ...func(innerSlice *[]T)) {
 	for _, v := range filterFuncs {
 		if v != nil {
-			v(&h.internal.Inner)
+			v((*[]T)(&h.internal.Inner))
 		}
 	}
 

@@ -7,18 +7,17 @@ import (
 	"github.com/ngicks/type-param-common/slice"
 )
 
+var _ heap.Lesser[Int] = Int(0)
+
 type Int int
 
-func (i Int) Unwrap() Int {
-	return i
-}
-func (i Int) Less(j heap.Lessable[Int]) bool {
-	return i < j.Unwrap()
+func (in Int) Less(i, j Int) bool {
+	return i < j
 }
 
 func TestHeapWithAdditionalProps(t *testing.T) {
 	t.Run("Exclude", func(t *testing.T) {
-		h := heap.NewFilterableHeap[Int, heap.Lessable[Int]]()
+		h := heap.NewFilterableHeap[Int]()
 
 		h.Push(Int(7))
 		h.Push(Int(4))
@@ -31,7 +30,7 @@ func TestHeapWithAdditionalProps(t *testing.T) {
 		exclude := heap.BuildExcludeFilter(
 			-1,
 			100,
-			func(ent heap.Lessable[Int]) bool { return ent.Unwrap()%2 == 0 },
+			func(ent Int) bool { return ent%2 == 0 },
 		)
 
 		lenBefore := h.Len()
@@ -44,7 +43,7 @@ func TestHeapWithAdditionalProps(t *testing.T) {
 
 		for i := 1; i <= 7; i = i + 2 {
 			popped := h.Pop()
-			if int(popped.Unwrap()) != i {
+			if int(popped) != i {
 				t.Errorf("pop = %v expected %v", popped, i)
 			}
 		}
@@ -64,7 +63,7 @@ func TestHeapWithAdditionalProps(t *testing.T) {
 		exclude = heap.BuildExcludeFilter(
 			0,
 			3,
-			func(ent heap.Lessable[Int]) bool { return ent.Unwrap()%2 == 0 },
+			func(ent Int) bool { return ent%2 == 0 },
 		)
 
 		lenBefore = h.Len()
@@ -90,7 +89,7 @@ func TestHeapWithAdditionalProps(t *testing.T) {
 		exclude = heap.BuildExcludeFilter(
 			3,
 			6,
-			func(ent heap.Lessable[Int]) bool { return ent.Unwrap()%2 == 0 },
+			func(ent Int) bool { return ent%2 == 0 },
 		)
 		lenBefore = h.Len()
 		h.Filter(exclude)
@@ -101,7 +100,7 @@ func TestHeapWithAdditionalProps(t *testing.T) {
 	})
 
 	t.Run("Clone", func(t *testing.T) {
-		h := heap.NewFilterableHeap[Int, heap.Lessable[Int]]()
+		h := heap.NewFilterableHeap[Int]()
 
 		h.Push(Int(7))
 		h.Push(Int(4))
@@ -115,12 +114,12 @@ func TestHeapWithAdditionalProps(t *testing.T) {
 
 		var out slice.Deque[int]
 		for h.Len() > 0 {
-			out.PushBack(int(h.Pop().Unwrap()))
+			out.PushBack(int(h.Pop()))
 		}
 
 		var outCloned slice.Deque[int]
 		for cloned.Len() > 0 {
-			outCloned.PushBack(int(cloned.Pop().Unwrap()))
+			outCloned.PushBack(int(cloned.Pop()))
 		}
 
 		for i := 0; i < len(out); i++ {

@@ -5,7 +5,10 @@ import (
 	"time"
 
 	"github.com/ngicks/type-param-common/heap"
+	heapparam "github.com/ngicks/type-param-common/heap-param"
 )
+
+var _ heapparam.Interface[int] = heap.NewSliceInterface[int](nil, nil, heap.HeapMethods[int]{})
 
 func TestSimpleHeap(t *testing.T) {
 	// Seeing basic delegation.
@@ -37,7 +40,7 @@ func TestSimpleHeap(t *testing.T) {
 			return i.t.Before(j.t)
 		}
 
-		h, inter := heap.MakeHeap(less)
+		h, inter := heap.MakeHeap(less, heap.HeapMethods[*testStruct]{})
 		ans := []*testStruct{
 			{t: time.Date(2021, 1, 1, 0, 0, 0, 0, time.UTC)},
 			{t: time.Date(2021, 2, 1, 0, 0, 0, 0, time.UTC)},
