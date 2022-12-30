@@ -1,6 +1,6 @@
 package slice
 
-// Doubly ended queueu.
+// Doubly ended queue.
 type Deque[T any] []T
 
 // Len returns length of underlying slice.
@@ -72,12 +72,20 @@ func pushBack[T any](sl *[]T, v T) {
 }
 
 func popBack[T any](sl *[]T) (v T, popped bool) {
+	var zero T
+
 	if len(*sl) == 0 {
-		return
+		return zero, false
 	}
-	popped = true
-	*sl, v = (*sl)[:len(*sl)-1], (*sl)[len(*sl)-1]
-	return
+
+	v = (*sl)[len(*sl)-1]
+
+	// avoiding memory leak.
+	(*sl)[len(*sl)-1] = zero
+
+	*sl = (*sl)[:len(*sl)-1]
+
+	return v, true
 }
 
 func pushFront[T any](sl *[]T, v T) {
@@ -85,10 +93,18 @@ func pushFront[T any](sl *[]T, v T) {
 }
 
 func popFront[T any](sl *[]T) (v T, popped bool) {
+	var zero T
+
 	if len(*sl) == 0 {
-		return
+		return zero, false
 	}
-	popped = true
-	*sl, v = (*sl)[1:], (*sl)[0]
-	return
+
+	v = (*sl)[0]
+
+	// avoiding memory leak
+	(*sl)[0] = zero
+
+	*sl = (*sl)[1:]
+
+	return v, true
 }
