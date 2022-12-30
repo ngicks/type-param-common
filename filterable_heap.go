@@ -2,6 +2,8 @@ package typeparamcommon
 
 type Lessable[T any] interface {
 	// Unwrap unwraps interface Lessable[T] to T.
+	// This is mainly for the workaround that
+	// Go has no equivalent of Self type (other languages often have).
 	Unwrap() T
 	// Less reports whether the self
 	// must sort before v.
